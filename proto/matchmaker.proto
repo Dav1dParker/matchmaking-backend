@@ -1,0 +1,33 @@
+syntax = "proto3";
+
+package matchmaking;
+
+service Matchmaker {
+  rpc Enqueue(Player) returns (EnqueueResponse);
+  rpc Cancel(PlayerID) returns (CancelResponse);
+  rpc StreamMatches(PlayerID) returns (stream Match);
+}
+
+message Player {
+  string id = 1;
+  int32 mmr = 2;
+  int32 ping = 3;
+  string region = 4;
+}
+
+message Match {
+  string match_id = 1;
+  repeated Player players = 2;
+}
+
+message PlayerID {
+  string id = 1;
+}
+
+message EnqueueResponse {
+  bool success = 1;
+}
+
+message CancelResponse {
+  bool success = 1;
+}
