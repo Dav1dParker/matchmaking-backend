@@ -1,15 +1,19 @@
-set(CMAKE_TOOLCHAIN_FILE "C:/Users/andre/Downloads/vkpkg/vcpkg/scripts/buildsystems/vcpkg.cmake")
-
-cmake_minimum_required(VERSION 3.22)
+cmake_minimum_required(VERSION 3.20)
 project(MatchmakingBackend LANGUAGES CXX)
 
 set(CMAKE_CXX_STANDARD 20)
-set(CMAKE_CXX_STANDARD_REQUIRED ON)
+find_package(Protobuf CONFIG REQUIRED)
+find_package(gRPC CONFIG REQUIRED)
 
-find_package(gRPC REQUIRED)
-find_package(Protobuf REQUIRED)
+include_directories(generated src)
 
-include_directories(${Protobuf_INCLUDE_DIRS})
-include_directories(${CMAKE_CURRENT_SOURCE_DIR}/include)
+add_executable(matchmaker_server
+        src/server.cpp
+        generated/matchmaker.pb.cc
+        generated/matchmaker.grpc.pb.cc
+)
 
-add_subdirectory(src)
+target_link_libraries(matchmaker_server PRIVATE
+        gRPC::grpc++
+        protobuf::libprotobuf
+)
