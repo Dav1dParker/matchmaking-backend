@@ -1,34 +1,35 @@
-#include <string>
-#include <grpcpp/grpcpp.h>
-#include "matchmaker.grpc.pb.h"
+#include "server.h"
 
-using grpc::Server;
-using grpc::ServerBuilder;
 using grpc::ServerContext;
+using grpc::ServerWriter;
 using grpc::Status;
 using namespace matchmaking;
 
-class MatchmakerServiceImpl final : public Matchmaker::Service {
-    Status Enqueue(ServerContext*, const Player*, EnqueueResponse*) override {
-        return Status::OK;
-    }
-    Status Cancel(ServerContext*, const PlayerID*, CancelResponse*) override {
-        return Status::OK;
-    }
-    Status StreamMatches(ServerContext*, const PlayerID*, grpc::ServerWriter<Match>*) override {
-        return Status::OK;
-    }
-};
+MatchmakerServiceImpl::MatchmakerServiceImpl() {
+    engine_.Start();
+}
 
-int main() {
-    std::string address = "0.0.0.0:50051";
-    MatchmakerServiceImpl service;
+MatchmakerServiceImpl::~MatchmakerServiceImpl() {
+    engine_.Stop();
+}
 
-    ServerBuilder builder;
-    builder.AddListeningPort(address, grpc::InsecureServerCredentials());
-    builder.RegisterService(&service);
-    std::unique_ptr<Server> server(builder.BuildAndStart());
-    //std::cout << "Matchmaker gRPC server running on 0.0.0.0:50051\n";
-    server->Wait();
-    return 0;
+Status MatchmakerServiceImpl::Enqueue(ServerContext*, const Player* request, EnqueueResponse* response) {
+    engine_.AddPlayer(*request);
+    response->set_success(true);
+    return Status::OK;
+}
+
+Status MatchmakerServiceImpl::Cancel(ServerContext*, const PlayerID* request, CancelResponse* response) {
+    response->set_success(engine_.RemovePlayer(request->id()));
+    return Status::OK;
+}
+
+Status MatchmakerServiceImpl::StreamMatches(ServerContext* context, const PlayerID*, ServerWriter<Match>* writer) {
+    while (!context->IsCancelled()) {
+        auto matches = engine_.GetNewMatches();
+        for (auto& m : matches)
+            writer->Write(m);
+        std::this_thread::sleep_for(std::chrono::milliseconds(500));
+    }
+    return Status::OK;
 }
