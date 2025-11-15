@@ -6,6 +6,7 @@
 #include <vector>
 #include <atomic>
 #include "matchmaker.pb.h"
+#include "PlayerEntry.h"
 
 class Engine {
 public:
@@ -23,7 +24,7 @@ private:
     void TickLoop();
     matchmaking::Match TryBuildMatch(std::vector<matchmaking::Player>& queue);
 
-    std::unordered_map<std::string, std::vector<matchmaking::Player>> regionQueues_;
+    std::unordered_map<std::string, std::deque<PlayerEntry>> regionQueues_;
     std::vector<matchmaking::Match> newMatches_;
 
     std::mutex mtx_;

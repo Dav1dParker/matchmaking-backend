@@ -37,6 +37,7 @@ CMakeUserPresets.json
 *.sln
 *.vcxproj*
 *.clangd
+SESSION.md
 
 # Logs and temp
 *.log

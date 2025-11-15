@@ -1,10 +1,12 @@
 #pragma once
 #include <vector>
 #include "matchmaker.pb.h"
+#include "PlayerEntry.h"
 
 class MatchBuilder {
 public:
-    static matchmaking::Match BuildBalancedMatch(std::vector<matchmaking::Player>& queue);
+    static bool BuildMatch(std::deque<PlayerEntry>& queue,
+                           matchmaking::Match& outMatch);
 
 private:
     static void SortByMMR(std::vector<matchmaking::Player>& queue);

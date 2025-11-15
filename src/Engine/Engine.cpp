@@ -1,6 +1,8 @@
 #include "Engine/Engine.h"
 #include <chrono>
 #include <iostream>
+
+#include "MatchBuilder.h"
 using namespace matchmaking;
 
 Engine::Engine() = default;
@@ -18,14 +20,17 @@ void Engine::Stop() {
 
 void Engine::AddPlayer(const Player& player) {
     std::scoped_lock lock(mtx_);
-    regionQueues_[player.region()].push_back(player);
+    regionQueues_[player.region()].push_back(PlayerEntry(player));
 }
 
 bool Engine::RemovePlayer(const std::string& id) {
     std::scoped_lock lock(mtx_);
     for (auto& [region, queue] : regionQueues_) {
         auto it = std::remove_if(queue.begin(), queue.end(),
-                                 [&](const Player& p) { return p.id() == id; });
+                                 [&](const PlayerEntry& e) {
+                                     return e.player.id() == id;
+                                 });
+
         if (it != queue.end()) {
             queue.erase(it, queue.end());
             return true;
@@ -47,10 +52,17 @@ void Engine::TickLoop() {
         std::scoped_lock lock(mtx_);
 
         for (auto& [region, queue] : regionQueues_) {
-            if (queue.size() >= 4) {
-                Match match = TryBuildMatch(queue);
-                newMatches_.push_back(match);
+            matchmaking::Match match;
+
+            while (true) {
+                if (MatchBuilder::BuildMatch(queue, match)) {
+                    newMatches_.push_back(match);
+                    match = matchmaking::Match();  // reset for next
+                } else {
+                    break;
+                }
             }
+
         }
     }
 }
