@@ -1,6 +1,6 @@
 # Matchmaking Simulation Backend
 
-This repository contains a small C++20 matchmaking system intended as a showcase project (e.g., for a Riot Games internship application). The project simulates players joining a queue and being matched into balanced 5v5 games, using a gRPC backend and a separate simulation client.
+This repository contains a small C++20 matchmaking system intended as a showcase project. The project simulates players joining a queue and being matched into balanced 5v5 games, using a gRPC backend and a separate simulation client.
 
 ## Overview
 
