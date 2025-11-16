@@ -1,7 +1,7 @@
 #pragma once
 #include <grpcpp/grpcpp.h>
 #include "matchmaker.grpc.pb.h"
-#include "engine/Engine.h"
+#include "Engine/Engine.h"
 
 class MatchmakerServiceImpl final : public matchmaking::Matchmaker::Service {
 public:
