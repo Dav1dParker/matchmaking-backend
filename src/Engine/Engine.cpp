@@ -71,7 +71,7 @@ void Engine::TickLoop() {
     }
 }
 
-Match Engine::TryBuildMatch(std::vector<Player>& queue) {
+Match Engine::TryBu1ildMatch(std::vector<Player>& queue) {
     Match match;
     match.set_match_id("match_" + std::to_string(rand()));
     for (int i = 0; i < 4; ++i) {

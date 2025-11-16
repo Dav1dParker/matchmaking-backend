@@ -6,6 +6,9 @@ set(CMAKE_CXX_STANDARD_REQUIRED ON)
 
 find_package(Protobuf CONFIG REQUIRED)
 find_package(gRPC CONFIG REQUIRED)
+find_package(GTest CONFIG REQUIRED)
+
+enable_testing()
 
 # include directories
 include_directories(
@@ -42,3 +45,19 @@ target_link_libraries(match_simulator PRIVATE
         gRPC::grpc++
         protobuf::libprotobuf
 )
+
+add_executable(matchmaking_tests
+        tests/MatchBuilderTests.cpp
+        src/engine/MatchBuilder.cpp
+        src/engine/MatchBuilder.h
+        src/engine/PlayerEntry.h
+        generated/matchmaker.pb.cc
+)
+
+target_link_libraries(matchmaking_tests PRIVATE
+        GTest::gtest
+        GTest::gtest_main
+        protobuf::libprotobuf
+)
+
+add_test(NAME matchmaking_tests COMMAND matchmaking_tests)

@@ -22,7 +22,7 @@ jobs:
         run: |
           git clone https://github.com/microsoft/vcpkg.git
           ./vcpkg/bootstrap-vcpkg.sh
-          ./vcpkg/vcpkg install grpc protobuf
+          ./vcpkg/vcpkg install grpc protobuf gtest
 
       - name: Configure CMake
         run: |
@@ -32,4 +32,7 @@ jobs:
 
       - name: Build
         run: cmake --build build --config Release
+
+      - name: Run tests
+        run: ctest --test-dir build --output-on-failure
 
