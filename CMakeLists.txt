@@ -30,3 +30,15 @@ target_link_libraries(matchmaker_server PRIVATE
         gRPC::grpc++
         protobuf::libprotobuf
 )
+
+add_executable(match_simulator
+        src/simulator/main_simulator.cpp
+        src/simulator/SimulatorClient.cpp
+        generated/matchmaker.pb.cc
+        generated/matchmaker.grpc.pb.cc
+)
+
+target_link_libraries(match_simulator PRIVATE
+        gRPC::grpc++
+        protobuf::libprotobuf
+)
