@@ -1,6 +1,5 @@
 #pragma once
 #include <mutex>
-#include <queue>
 #include <thread>
 #include <unordered_map>
 #include <vector>
@@ -22,7 +21,6 @@ public:
 
 private:
     void TickLoop();
-    matchmaking::Match TryBuildMatch(std::vector<matchmaking::Player>& queue);
 
     std::unordered_map<std::string, std::deque<PlayerEntry>> regionQueues_;
     std::vector<matchmaking::Match> newMatches_;

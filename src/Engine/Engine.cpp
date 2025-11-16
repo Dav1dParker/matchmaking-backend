@@ -21,6 +21,12 @@ void Engine::Stop() {
 void Engine::AddPlayer(const Player& player) {
     std::scoped_lock lock(mtx_);
     regionQueues_[player.region()].push_back(PlayerEntry(player));
+
+    std::size_t total = 0;
+    for (const auto& [region, queue] : regionQueues_) {
+        total += queue.size();
+    }
+    std::cout << "Players currently in queue: " << total << std::endl;
 }
 
 bool Engine::RemovePlayer(const std::string& id) {

@@ -1,4 +1,4 @@
-﻿#include <deque>
+#include <deque>
 
 #include <gtest/gtest.h>
 
@@ -120,4 +120,39 @@ TEST(MatchBuilderTests, MatchUsesOnlyPlayersInsideMmrWindow) {
     for (int i = 0; i < 3; ++i) {
         EXPECT_EQ(queue[i].player.id(), "far" + std::to_string(i));
     }
+}
+
+TEST(MatchBuilderTests, TeamsAreReasonablyBalancedByMmr) {
+    std::deque<PlayerEntry> queue;
+
+    for (int i = 0; i < 10; ++i) {
+        Player p;
+        p.set_id("p" + std::to_string(i));
+        p.set_mmr(900 + i * 10);
+        p.set_ping(40 + i);
+        p.set_region("NA");
+        queue.emplace_back(p);
+    }
+
+    Match match;
+    bool built = MatchBuilder::BuildMatch(queue, match);
+
+    ASSERT_TRUE(built);
+    ASSERT_EQ(match.players_size(), 10);
+
+    int sum_a = 0;
+    int sum_b = 0;
+    for (int i = 0; i < 5; ++i) {
+        sum_a += match.players(i).mmr();
+    }
+    for (int i = 5; i < 10; ++i) {
+        sum_b += match.players(i).mmr();
+    }
+
+    int avg_a = sum_a / 5;
+    int avg_b = sum_b / 5;
+    int diff = avg_a - avg_b;
+    if (diff < 0) diff = -diff;
+
+    EXPECT_LT(diff, 300);
 }
