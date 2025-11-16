@@ -1,0 +1,5 @@
+{
+  "tick_interval_ms": 100,
+  "matches_path": "matches.jsonl"
+}
+

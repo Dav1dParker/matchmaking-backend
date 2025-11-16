@@ -1,0 +1,6 @@
+{
+  "target_address": "localhost:50051",
+  "total_players": 10000,
+  "delay_ms_between_players": 10
+}
+
