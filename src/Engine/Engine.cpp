@@ -70,14 +70,3 @@ void Engine::TickLoop() {
         }
     }
 }
-
-Match Engine::TryBu1ildMatch(std::vector<Player>& queue) {
-    Match match;
-    match.set_match_id("match_" + std::to_string(rand()));
-    for (int i = 0; i < 4; ++i) {
-        *match.add_players() = queue.front();
-        queue.erase(queue.begin());
-    }
-    std::cout << "Built match with 4 players.\n";
-    return match;
-}
