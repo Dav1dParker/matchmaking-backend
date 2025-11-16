@@ -5,7 +5,9 @@
 #include "MatchBuilder.h"
 using namespace matchmaking;
 
-Engine::Engine() = default;
+Engine::Engine()
+    : config_(EngineConfig::LoadFromFile("config/server_config.json")),
+      persistence_(config_.matches_path) {}
 Engine::~Engine() { Stop(); }
 
 void Engine::Start() {
@@ -54,7 +56,7 @@ std::vector<Match> Engine::GetNewMatches() {
 
 void Engine::TickLoop() {
     while (running_) {
-        std::this_thread::sleep_for(std::chrono::milliseconds(100));
+        std::this_thread::sleep_for(std::chrono::milliseconds(config_.tick_interval_ms));
         std::scoped_lock lock(mtx_);
 
         for (auto& [region, queue] : regionQueues_) {
@@ -67,6 +69,7 @@ void Engine::TickLoop() {
                               << " with " << match.players_size()
                               << " players" << std::endl;
                     newMatches_.push_back(match);
+                    persistence_.Append(match);
                     match = matchmaking::Match();  // reset for next
                 } else {
                     break;

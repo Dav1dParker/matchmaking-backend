@@ -6,6 +6,8 @@
 #include <atomic>
 #include "matchmaker.pb.h"
 #include "PlayerEntry.h"
+#include "EngineConfig.h"
+#include "MatchPersistence.h"
 
 class Engine {
 public:
@@ -24,6 +26,8 @@ private:
 
     std::unordered_map<std::string, std::deque<PlayerEntry>> regionQueues_;
     std::vector<matchmaking::Match> newMatches_;
+    EngineConfig config_;
+    MatchPersistence persistence_;
 
     std::mutex mtx_;
     std::atomic<bool> running_{false};

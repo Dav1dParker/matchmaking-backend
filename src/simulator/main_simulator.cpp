@@ -6,6 +6,7 @@
 #include <vector>
 
 #include "simulator/SimulatorClient.h"
+#include "simulator/SimConfig.h"
 #include "matchmaker.pb.h"
 
 static matchmaking::Player MakeDummyPlayer(int index) {
@@ -27,16 +28,14 @@ static matchmaking::Player MakeDummyPlayer(int index) {
 }
 
 int main() {
-    const std::string target_address = "localhost:50051";
-    constexpr int total_players = 100;
-    constexpr int delay_ms_between_players = 10;
+    SimConfig config = SimConfig::LoadFromFile("config/sim_config.json");
 
-    std::cout << "Starting match_simulator, target=" << target_address
-              << ", total_players=" << total_players << std::endl;
+    std::cout << "Starting match_simulator, target=" << config.target_address
+              << ", total_players=" << config.total_players << std::endl;
 
-    SimulatorClient client(target_address);
+    SimulatorClient client(config.target_address);
 
-    for (int i = 0; i < total_players; ++i) {
+    for (int i = 0; i < config.total_players; ++i) {
         auto player = MakeDummyPlayer(i);
 
         bool ok = client.Enqueue(player);
@@ -49,10 +48,9 @@ int main() {
                       << ", region=" << player.region() << ")\n";
         }
 
-        std::this_thread::sleep_for(std::chrono::milliseconds(delay_ms_between_players));
+        std::this_thread::sleep_for(std::chrono::milliseconds(config.delay_ms_between_players));
     }
 
     std::cout << "Simulation finished.\n";
     return 0;
 }
-

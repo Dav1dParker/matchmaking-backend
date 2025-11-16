@@ -22,8 +22,12 @@ add_executable(matchmaker_server
         src/server.h
         src/Engine/Engine.cpp
         src/Engine/Engine.h
+        src/Engine/EngineConfig.cpp
+        src/Engine/EngineConfig.h
         src/Engine/MatchBuilder.cpp
         src/Engine/MatchBuilder.h
+        src/Engine/MatchPersistence.cpp
+        src/Engine/MatchPersistence.h
         generated/matchmaker.pb.cc
         generated/matchmaker.grpc.pb.cc
 )
@@ -37,6 +41,8 @@ target_link_libraries(matchmaker_server PRIVATE
 add_executable(match_simulator
         src/simulator/main_simulator.cpp
         src/simulator/SimulatorClient.cpp
+        src/simulator/SimConfig.cpp
+        src/simulator/SimConfig.h
         generated/matchmaker.pb.cc
         generated/matchmaker.grpc.pb.cc
 )
