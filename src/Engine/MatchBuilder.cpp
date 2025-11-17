@@ -37,7 +37,7 @@ bool IsRegionAllowedForPlayer(const PlayerEntry& entry,
         {"ASIA", GetRegionPing(p, "ASIA")}
     };
 
-    std::sort(std::begin(regions), std::end(regions),
+    std::sort(regions, regions + 3,
               [](const RegionPing& a, const RegionPing& b) {
                   return a.ping < b.ping;
               });

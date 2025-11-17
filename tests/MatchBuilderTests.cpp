@@ -44,7 +44,7 @@ TEST(MatchBuilderTests, ReturnsFalseWhenQueueHasFewerThanTenPlayers) {
 
     queue.emplace_back(p);
 
-    bool built = MatchBuilder::BuildMatch(queue, match, config);
+    bool built = MatchBuilder::BuildMatch(queue, match, config, "NA");
 
     EXPECT_FALSE(built);
     EXPECT_TRUE(queue.size() == 1);
@@ -386,7 +386,7 @@ TEST(MatchBuilderTests, AcceptsUnbalancedMatchAfterMinWait) {
     queue.front().queuedAt -= std::chrono::milliseconds(31000);
 
     Match match;
-    bool built = MatchBuilder::BuildMatch(queue, match, config);
+    bool built = MatchBuilder::BuildMatch(queue, match, config, "NA");
 
     EXPECT_TRUE(built);
     EXPECT_EQ(match.players_size(), 10);
