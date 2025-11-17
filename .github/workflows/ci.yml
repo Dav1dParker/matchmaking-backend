@@ -18,9 +18,19 @@ jobs:
           sudo apt-get update
           sudo apt-get install -y ninja-build cmake g++ git
 
+      - name: Cache vcpkg
+        uses: actions/cache@v4
+        with:
+          path: vcpkg
+          key: vcpkg-${{ runner.os }}-${{ hashFiles('vcpkg.json') }}
+          restore-keys: |
+            vcpkg-${{ runner.os }}-
+
       - name: Install vcpkg and dependencies
         run: |
-          git clone https://github.com/microsoft/vcpkg.git
+          if [ ! -d vcpkg ]; then
+            git clone https://github.com/microsoft/vcpkg.git
+          fi
           ./vcpkg/bootstrap-vcpkg.sh
           ./vcpkg/vcpkg install grpc protobuf gtest
 
@@ -35,4 +45,19 @@ jobs:
 
       - name: Run tests
         run: ctest --test-dir build --output-on-failure
+
+  docker-images:
+    runs-on: ubuntu-latest
+    needs: build
+
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      - name: Build server image
+        run: docker build -f Dockerfile.server -t matchmaking-server:latest .
+
+      - name: Build simulator image
+        run: docker build -f Dockerfile.simulator -t matchmaking-simulator:latest .
+
 

@@ -1,0 +1,21 @@
+version: "3.9"
+
+services:
+  server:
+    build:
+      context: .
+      dockerfile: Dockerfile.server
+    container_name: mm-server
+    ports:
+      - "50051:50051"
+
+  simulator:
+    build:
+      context: .
+      dockerfile: Dockerfile.simulator
+    container_name: mm-sim
+    depends_on:
+      - server
+    environment:
+      - SIM_TARGET_ADDRESS=mm-server:50051
+

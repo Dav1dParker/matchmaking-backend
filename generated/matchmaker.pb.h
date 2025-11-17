@@ -426,6 +426,9 @@ class Player final : public ::google::protobuf::Message
     kRegionFieldNumber = 4,
     kMmrFieldNumber = 2,
     kPingFieldNumber = 3,
+    kPingNaFieldNumber = 5,
+    kPingEuFieldNumber = 6,
+    kPingAsiaFieldNumber = 7,
   };
   // string id = 1;
   void clear_id() ;
@@ -479,12 +482,42 @@ class Player final : public ::google::protobuf::Message
   void _internal_set_ping(::int32_t value);
 
   public:
+  // int32 ping_na = 5;
+  void clear_ping_na() ;
+  ::int32_t ping_na() const;
+  void set_ping_na(::int32_t value);
+
+  private:
+  ::int32_t _internal_ping_na() const;
+  void _internal_set_ping_na(::int32_t value);
+
+  public:
+  // int32 ping_eu = 6;
+  void clear_ping_eu() ;
+  ::int32_t ping_eu() const;
+  void set_ping_eu(::int32_t value);
+
+  private:
+  ::int32_t _internal_ping_eu() const;
+  void _internal_set_ping_eu(::int32_t value);
+
+  public:
+  // int32 ping_asia = 7;
+  void clear_ping_asia() ;
+  ::int32_t ping_asia() const;
+  void set_ping_asia(::int32_t value);
+
+  private:
+  ::int32_t _internal_ping_asia() const;
+  void _internal_set_ping_asia(::int32_t value);
+
+  public:
   // @@protoc_insertion_point(class_scope:matchmaking.Player)
  private:
   class _Internal;
   friend class ::google::protobuf::internal::TcParser;
   static const ::google::protobuf::internal::TcParseTable<
-      2, 4, 0,
+      3, 7, 0,
       35, 2>
       _table_;
 
@@ -506,6 +539,9 @@ class Player final : public ::google::protobuf::Message
     ::google::protobuf::internal::ArenaStringPtr region_;
     ::int32_t mmr_;
     ::int32_t ping_;
+    ::int32_t ping_na_;
+    ::int32_t ping_eu_;
+    ::int32_t ping_asia_;
     ::google::protobuf::internal::CachedSize _cached_size_;
     PROTOBUF_TSAN_DECLARE_MEMBER
   };
@@ -1262,6 +1298,72 @@ inline void Player::set_allocated_region(std::string* value) {
     _impl_.region_.Set("", GetArena());
   }
   // @@protoc_insertion_point(field_set_allocated:matchmaking.Player.region)
+}
+
+// int32 ping_na = 5;
+inline void Player::clear_ping_na() {
+  ::google::protobuf::internal::TSanWrite(&_impl_);
+  _impl_.ping_na_ = 0;
+}
+inline ::int32_t Player::ping_na() const {
+  // @@protoc_insertion_point(field_get:matchmaking.Player.ping_na)
+  return _internal_ping_na();
+}
+inline void Player::set_ping_na(::int32_t value) {
+  _internal_set_ping_na(value);
+  // @@protoc_insertion_point(field_set:matchmaking.Player.ping_na)
+}
+inline ::int32_t Player::_internal_ping_na() const {
+  ::google::protobuf::internal::TSanRead(&_impl_);
+  return _impl_.ping_na_;
+}
+inline void Player::_internal_set_ping_na(::int32_t value) {
+  ::google::protobuf::internal::TSanWrite(&_impl_);
+  _impl_.ping_na_ = value;
+}
+
+// int32 ping_eu = 6;
+inline void Player::clear_ping_eu() {
+  ::google::protobuf::internal::TSanWrite(&_impl_);
+  _impl_.ping_eu_ = 0;
+}
+inline ::int32_t Player::ping_eu() const {
+  // @@protoc_insertion_point(field_get:matchmaking.Player.ping_eu)
+  return _internal_ping_eu();
+}
+inline void Player::set_ping_eu(::int32_t value) {
+  _internal_set_ping_eu(value);
+  // @@protoc_insertion_point(field_set:matchmaking.Player.ping_eu)
+}
+inline ::int32_t Player::_internal_ping_eu() const {
+  ::google::protobuf::internal::TSanRead(&_impl_);
+  return _impl_.ping_eu_;
+}
+inline void Player::_internal_set_ping_eu(::int32_t value) {
+  ::google::protobuf::internal::TSanWrite(&_impl_);
+  _impl_.ping_eu_ = value;
+}
+
+// int32 ping_asia = 7;
+inline void Player::clear_ping_asia() {
+  ::google::protobuf::internal::TSanWrite(&_impl_);
+  _impl_.ping_asia_ = 0;
+}
+inline ::int32_t Player::ping_asia() const {
+  // @@protoc_insertion_point(field_get:matchmaking.Player.ping_asia)
+  return _internal_ping_asia();
+}
+inline void Player::set_ping_asia(::int32_t value) {
+  _internal_set_ping_asia(value);
+  // @@protoc_insertion_point(field_set:matchmaking.Player.ping_asia)
+}
+inline ::int32_t Player::_internal_ping_asia() const {
+  ::google::protobuf::internal::TSanRead(&_impl_);
+  return _impl_.ping_asia_;
+}
+inline void Player::_internal_set_ping_asia(::int32_t value) {
+  ::google::protobuf::internal::TSanWrite(&_impl_);
+  _impl_.ping_asia_ = value;
 }
 
 // -------------------------------------------------------------------

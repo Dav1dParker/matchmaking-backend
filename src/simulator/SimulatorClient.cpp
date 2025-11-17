@@ -28,3 +28,29 @@ bool SimulatorClient::Enqueue(const matchmaking::Player& player) {
     return true;
 }
 
+bool SimulatorClient::StreamMatches(const std::string& player_id) {
+    matchmaking::PlayerID request;
+    request.set_id(player_id);
+
+    grpc::ClientContext context;
+    matchmaking::Match match;
+
+    std::unique_ptr<grpc::ClientReader<matchmaking::Match>> reader =
+        stub_->StreamMatches(&context, request);
+
+    while (reader->Read(&match)) {
+        std::cout << "Received match " << match.match_id()
+                  << " for player " << player_id
+                  << " with " << match.players_size() << " players\n";
+    }
+
+    grpc::Status status = reader->Finish();
+    if (!status.ok()) {
+        std::cerr << "StreamMatches RPC failed for " << player_id
+                  << ": " << status.error_message() << "\n";
+        return false;
+    }
+
+    return true;
+}
+

@@ -19,13 +19,13 @@ public:
 
     void AddPlayer(const matchmaking::Player& player);
     bool RemovePlayer(const std::string& id);
-    std::vector<matchmaking::Match> GetNewMatches();
+    std::vector<matchmaking::Match> GetMatchesForPlayer(const std::string& id);
 
 private:
     void TickLoop();
 
-    std::unordered_map<std::string, std::deque<PlayerEntry>> regionQueues_;
-    std::vector<matchmaking::Match> newMatches_;
+    std::deque<PlayerEntry> queue_;
+    std::unordered_map<std::string, std::vector<matchmaking::Match>> pendingMatches_;
     EngineConfig config_;
     MatchPersistence persistence_;
 

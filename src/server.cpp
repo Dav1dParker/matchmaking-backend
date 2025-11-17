@@ -24,12 +24,18 @@ Status MatchmakerServiceImpl::Cancel(ServerContext*, const PlayerID* request, Ca
     return Status::OK;
 }
 
-Status MatchmakerServiceImpl::StreamMatches(ServerContext* context, const PlayerID*, ServerWriter<Match>* writer) {
+Status MatchmakerServiceImpl::StreamMatches(ServerContext* context, const PlayerID* request, ServerWriter<Match>* writer) {
+    const std::string player_id = request->id();
+
     while (!context->IsCancelled()) {
-        auto matches = engine_.GetNewMatches();
-        for (auto& m : matches)
+        auto matches = engine_.GetMatchesForPlayer(player_id);
+        for (auto& m : matches) {
             writer->Write(m);
-        std::this_thread::sleep_for(std::chrono::milliseconds(500));
+        }
+        if (!matches.empty()) {
+            return Status::OK;
+        }
+        std::this_thread::sleep_for(std::chrono::milliseconds(200));
     }
     return Status::OK;
 }

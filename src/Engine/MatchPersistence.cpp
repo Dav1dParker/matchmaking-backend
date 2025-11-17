@@ -23,6 +23,9 @@ void MatchPersistence::Append(const matchmaking::Match& match) {
         out << "\"id\":\"" << p.id() << "\"";
         out << ",\"mmr\":" << p.mmr();
         out << ",\"ping\":" << p.ping();
+        out << ",\"ping_na\":" << p.ping_na();
+        out << ",\"ping_eu\":" << p.ping_eu();
+        out << ",\"ping_asia\":" << p.ping_asia();
         out << ",\"region\":\"" << p.region() << "\"";
         out << "}";
     }

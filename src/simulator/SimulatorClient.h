@@ -11,6 +11,7 @@ public:
     explicit SimulatorClient(const std::string& target_address);
 
     bool Enqueue(const matchmaking::Player& player);
+    bool StreamMatches(const std::string& player_id);
 
 private:
     std::unique_ptr<matchmaking::Matchmaker::Stub> stub_;
