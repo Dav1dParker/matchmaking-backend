@@ -13,6 +13,9 @@ message Player {
   int32 mmr = 2;
   int32 ping = 3;
   string region = 4;
+  int32 ping_na = 5;
+  int32 ping_eu = 6;
+  int32 ping_asia = 7;
 }
 
 message Match {

@@ -24,7 +24,7 @@ public:
 private:
     void TickLoop();
 
-    std::unordered_map<std::string, std::deque<PlayerEntry>> regionQueues_;
+    std::deque<PlayerEntry> queue_;
     std::unordered_map<std::string, std::vector<matchmaking::Match>> pendingMatches_;
     EngineConfig config_;
     MatchPersistence persistence_;

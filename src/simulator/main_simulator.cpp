@@ -13,16 +13,32 @@ static matchmaking::Player MakeDummyPlayer(int index) {
     static std::mt19937 rng(std::random_device{}());
 
     std::uniform_int_distribution<int> mmr_dist(800, 2400);
-    std::uniform_int_distribution<int> ping_dist(20, 150);
-
-    const std::vector<std::string> regions = {"NA", "EU", "ASIA"};
-    std::uniform_int_distribution<std::size_t> region_dist(0, regions.size() - 1);
+    std::uniform_int_distribution<int> base_ping_dist(20, 60);
+    std::uniform_int_distribution<int> extra_ping_dist(60, 140);
 
     matchmaking::Player player;
     player.set_id("player_" + std::to_string(index));
     player.set_mmr(mmr_dist(rng));
-    player.set_ping(ping_dist(rng));
-    player.set_region(regions[region_dist(rng)]);
+
+    const std::vector<std::string> regions = {"NA", "EU", "ASIA"};
+    std::uniform_int_distribution<std::size_t> home_dist(0, regions.size() - 1);
+    std::size_t home_index = home_dist(rng);
+
+    int base_ping = base_ping_dist(rng);
+
+    int ping_na = base_ping + (home_index == 0 ? 0 : extra_ping_dist(rng));
+    int ping_eu = base_ping + (home_index == 1 ? 0 : extra_ping_dist(rng));
+    int ping_asia = base_ping + (home_index == 2 ? 0 : extra_ping_dist(rng));
+
+    player.set_ping_na(ping_na);
+    player.set_ping_eu(ping_eu);
+    player.set_ping_asia(ping_asia);
+
+    std::string home_region = regions[home_index];
+    int best_ping = base_ping;
+
+    player.set_ping(best_ping);
+    player.set_region(home_region);
 
     return player;
 }

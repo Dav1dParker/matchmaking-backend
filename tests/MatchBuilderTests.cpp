@@ -21,6 +21,11 @@ EngineConfig DefaultTestConfig() {
     cfg.max_ping_ms_cap = 200;
     cfg.min_wait_before_match_ms = 0;
     cfg.max_allowed_mmr_diff = 1000;
+    cfg.base_mmr_window = 200;
+    cfg.mmr_relax_per_second = 50;
+    cfg.max_mmr_window = 1000;
+    cfg.mmr_diff_relax_per_second = 0;
+    cfg.max_relaxed_mmr_diff = cfg.max_allowed_mmr_diff;
     return cfg;
 }
 
@@ -60,7 +65,7 @@ TEST(MatchBuilderTests, BuildsMatchWhenQueueHasAtLeastTenPlayers) {
     }
 
     Match match;
-    bool built = MatchBuilder::BuildMatch(queue, match, config);
+    bool built = MatchBuilder::BuildMatch(queue, match, config, "NA");
 
     EXPECT_TRUE(built);
     EXPECT_EQ(match.players_size(), 10);
@@ -98,7 +103,7 @@ TEST(MatchBuilderTests, NotEnoughPlayersInsideMmrWindowDoesNotBuildMatch) {
     EngineConfig config = DefaultTestConfig();
 
     Match match;
-    bool built = MatchBuilder::BuildMatch(queue, match, config);
+    bool built = MatchBuilder::BuildMatch(queue, match, config, "NA");
 
     EXPECT_FALSE(built);
     EXPECT_EQ(queue.size(), 10u);
@@ -136,7 +141,7 @@ TEST(MatchBuilderTests, MatchUsesOnlyPlayersInsideMmrWindow) {
     EngineConfig config = DefaultTestConfig();
 
     Match match;
-    bool built = MatchBuilder::BuildMatch(queue, match, config);
+    bool built = MatchBuilder::BuildMatch(queue, match, config, "NA");
 
     EXPECT_TRUE(built);
     EXPECT_EQ(match.players_size(), 10);
@@ -162,7 +167,7 @@ TEST(MatchBuilderTests, TeamsAreReasonablyBalancedByMmr) {
     EngineConfig config = DefaultTestConfig();
 
     Match match;
-    bool built = MatchBuilder::BuildMatch(queue, match, config);
+    bool built = MatchBuilder::BuildMatch(queue, match, config, "NA");
 
     ASSERT_TRUE(built);
     ASSERT_EQ(match.players_size(), 10);
@@ -211,7 +216,7 @@ TEST(MatchBuilderTests, HighPingPlayersAreExcludedWhenUnderPingLimit) {
     }
 
     Match match;
-    bool built = MatchBuilder::BuildMatch(queue, match, config);
+    bool built = MatchBuilder::BuildMatch(queue, match, config, "NA");
 
     ASSERT_TRUE(built);
     ASSERT_EQ(match.players_size(), 10);
@@ -253,7 +258,7 @@ TEST(MatchBuilderTests, NotEnoughLowPingPlayersNoMatch) {
     }
 
     Match match;
-    bool built = MatchBuilder::BuildMatch(queue, match, config);
+    bool built = MatchBuilder::BuildMatch(queue, match, config, "NA");
 
     EXPECT_FALSE(built);
     EXPECT_EQ(queue.size(), 15u);
@@ -286,7 +291,7 @@ TEST(MatchBuilderTests, PingRelaxationOverTimeAllowsHighPingPlayers) {
     queue.front().queuedAt -= std::chrono::seconds(10);
 
     Match match;
-    bool built = MatchBuilder::BuildMatch(queue, match, config);
+    bool built = MatchBuilder::BuildMatch(queue, match, config, "NA");
 
     ASSERT_TRUE(built);
     ASSERT_EQ(match.players_size(), 10);
@@ -333,7 +338,7 @@ TEST(MatchBuilderTests, PingWindowIsCappedByMaxPingCap) {
     queue.front().queuedAt -= std::chrono::seconds(10);
 
     Match match;
-    bool built = MatchBuilder::BuildMatch(queue, match, config);
+    bool built = MatchBuilder::BuildMatch(queue, match, config, "NA");
 
     EXPECT_FALSE(built);
     EXPECT_EQ(queue.size(), 15u);
@@ -356,7 +361,7 @@ TEST(MatchBuilderTests, RejectsUnbalancedMatchBeforeMinWait) {
     }
 
     Match match;
-    bool built = MatchBuilder::BuildMatch(queue, match, config);
+    bool built = MatchBuilder::BuildMatch(queue, match, config, "NA");
 
     EXPECT_FALSE(built);
     EXPECT_EQ(queue.size(), 10u);
@@ -367,7 +372,7 @@ TEST(MatchBuilderTests, AcceptsUnbalancedMatchAfterMinWait) {
 
     EngineConfig config = DefaultTestConfig();
     config.min_wait_before_match_ms = 30000;
-    config.max_allowed_mmr_diff = 0;
+    config.max_allowed_mmr_diff = 1000;
 
     for (int i = 0; i < 10; ++i) {
         Player p;

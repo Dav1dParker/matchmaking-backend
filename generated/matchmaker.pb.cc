@@ -63,6 +63,9 @@ inline constexpr Player::Impl_::Impl_(
             ::_pbi::ConstantInitialized()),
         mmr_{0},
         ping_{0},
+        ping_na_{0},
+        ping_eu_{0},
+        ping_asia_{0},
         _cached_size_{0} {}
 
 template <typename>
@@ -182,6 +185,9 @@ const ::uint32_t
         PROTOBUF_FIELD_OFFSET(::matchmaking::Player, _impl_.mmr_),
         PROTOBUF_FIELD_OFFSET(::matchmaking::Player, _impl_.ping_),
         PROTOBUF_FIELD_OFFSET(::matchmaking::Player, _impl_.region_),
+        PROTOBUF_FIELD_OFFSET(::matchmaking::Player, _impl_.ping_na_),
+        PROTOBUF_FIELD_OFFSET(::matchmaking::Player, _impl_.ping_eu_),
+        PROTOBUF_FIELD_OFFSET(::matchmaking::Player, _impl_.ping_asia_),
         ~0u,  // no _has_bits_
         PROTOBUF_FIELD_OFFSET(::matchmaking::Match, _internal_metadata_),
         ~0u,  // no _extensions_
@@ -224,10 +230,10 @@ const ::uint32_t
 static const ::_pbi::MigrationSchema
     schemas[] ABSL_ATTRIBUTE_SECTION_VARIABLE(protodesc_cold) = {
         {0, -1, -1, sizeof(::matchmaking::Player)},
-        {12, -1, -1, sizeof(::matchmaking::Match)},
-        {22, -1, -1, sizeof(::matchmaking::PlayerID)},
-        {31, -1, -1, sizeof(::matchmaking::EnqueueResponse)},
-        {40, -1, -1, sizeof(::matchmaking::CancelResponse)},
+        {15, -1, -1, sizeof(::matchmaking::Match)},
+        {25, -1, -1, sizeof(::matchmaking::PlayerID)},
+        {34, -1, -1, sizeof(::matchmaking::EnqueueResponse)},
+        {43, -1, -1, sizeof(::matchmaking::CancelResponse)},
 };
 static const ::_pb::Message* const file_default_instances[] = {
     &::matchmaking::_Player_default_instance_._instance,
@@ -238,24 +244,25 @@ static const ::_pb::Message* const file_default_instances[] = {
 };
 const char descriptor_table_protodef_matchmaker_2eproto[] ABSL_ATTRIBUTE_SECTION_VARIABLE(
     protodesc_cold) = {
-    "\n\020matchmaker.proto\022\013matchmaking\"\?\n\006Playe"
+    "\n\020matchmaker.proto\022\013matchmaking\"t\n\006Playe"
     "r\022\n\n\002id\030\001 \001(\t\022\013\n\003mmr\030\002 \001(\005\022\014\n\004ping\030\003 \001(\005"
-    "\022\016\n\006region\030\004 \001(\t\"\?\n\005Match\022\020\n\010match_id\030\001 "
-    "\001(\t\022$\n\007players\030\002 \003(\0132\023.matchmaking.Playe"
-    "r\"\026\n\010PlayerID\022\n\n\002id\030\001 \001(\t\"\"\n\017EnqueueResp"
-    "onse\022\017\n\007success\030\001 \001(\010\"!\n\016CancelResponse\022"
-    "\017\n\007success\030\001 \001(\0102\306\001\n\nMatchmaker\022<\n\007Enque"
-    "ue\022\023.matchmaking.Player\032\034.matchmaking.En"
-    "queueResponse\022<\n\006Cancel\022\025.matchmaking.Pl"
-    "ayerID\032\033.matchmaking.CancelResponse\022<\n\rS"
-    "treamMatches\022\025.matchmaking.PlayerID\032\022.ma"
-    "tchmaking.Match0\001b\006proto3"
+    "\022\016\n\006region\030\004 \001(\t\022\017\n\007ping_na\030\005 \001(\005\022\017\n\007pin"
+    "g_eu\030\006 \001(\005\022\021\n\tping_asia\030\007 \001(\005\"\?\n\005Match\022\020"
+    "\n\010match_id\030\001 \001(\t\022$\n\007players\030\002 \003(\0132\023.matc"
+    "hmaking.Player\"\026\n\010PlayerID\022\n\n\002id\030\001 \001(\t\"\""
+    "\n\017EnqueueResponse\022\017\n\007success\030\001 \001(\010\"!\n\016Ca"
+    "ncelResponse\022\017\n\007success\030\001 \001(\0102\306\001\n\nMatchm"
+    "aker\022<\n\007Enqueue\022\023.matchmaking.Player\032\034.m"
+    "atchmaking.EnqueueResponse\022<\n\006Cancel\022\025.m"
+    "atchmaking.PlayerID\032\033.matchmaking.Cancel"
+    "Response\022<\n\rStreamMatches\022\025.matchmaking."
+    "PlayerID\032\022.matchmaking.Match0\001b\006proto3"
 };
 static ::absl::once_flag descriptor_table_matchmaker_2eproto_once;
 PROTOBUF_CONSTINIT const ::_pbi::DescriptorTable descriptor_table_matchmaker_2eproto = {
     false,
     false,
-    465,
+    518,
     descriptor_table_protodef_matchmaker_2eproto,
     "matchmaker.proto",
     &descriptor_table_matchmaker_2eproto_once,
@@ -308,9 +315,9 @@ Player::Player(
                offsetof(Impl_, mmr_),
            reinterpret_cast<const char *>(&from._impl_) +
                offsetof(Impl_, mmr_),
-           offsetof(Impl_, ping_) -
+           offsetof(Impl_, ping_asia_) -
                offsetof(Impl_, mmr_) +
-               sizeof(Impl_::ping_));
+               sizeof(Impl_::ping_asia_));
 
   // @@protoc_insertion_point(copy_constructor:matchmaking.Player)
 }
@@ -326,9 +333,9 @@ inline void Player::SharedCtor(::_pb::Arena* arena) {
   ::memset(reinterpret_cast<char *>(&_impl_) +
                offsetof(Impl_, mmr_),
            0,
-           offsetof(Impl_, ping_) -
+           offsetof(Impl_, ping_asia_) -
                offsetof(Impl_, mmr_) +
-               sizeof(Impl_::ping_));
+               sizeof(Impl_::ping_asia_));
 }
 Player::~Player() {
   // @@protoc_insertion_point(destructor:matchmaking.Player)
@@ -379,15 +386,15 @@ const ::google::protobuf::internal::ClassData* Player::GetClassData() const {
   return _class_data_.base();
 }
 PROTOBUF_CONSTINIT PROTOBUF_ATTRIBUTE_INIT_PRIORITY1
-const ::_pbi::TcParseTable<2, 4, 0, 35, 2> Player::_table_ = {
+const ::_pbi::TcParseTable<3, 7, 0, 35, 2> Player::_table_ = {
   {
     0,  // no _has_bits_
     0, // no _extensions_
-    4, 24,  // max_field_number, fast_idx_mask
+    7, 56,  // max_field_number, fast_idx_mask
     offsetof(decltype(_table_), field_lookup_table),
-    4294967280,  // skipmap
+    4294967168,  // skipmap
     offsetof(decltype(_table_), field_entries),
-    4,  // num_field_entries
+    7,  // num_field_entries
     0,  // num_aux_entries
     offsetof(decltype(_table_), field_names),  // no aux_entries
     _class_data_.base(),
@@ -397,9 +404,7 @@ const ::_pbi::TcParseTable<2, 4, 0, 35, 2> Player::_table_ = {
     ::_pbi::TcParser::GetTable<::matchmaking::Player>(),  // to_prefetch
     #endif  // PROTOBUF_PREFETCH_PARSE_TABLE
   }, {{
-    // string region = 4;
-    {::_pbi::TcParser::FastUS1,
-     {34, 63, 0, PROTOBUF_FIELD_OFFSET(Player, _impl_.region_)}},
+    {::_pbi::TcParser::MiniParse, {}},
     // string id = 1;
     {::_pbi::TcParser::FastUS1,
      {10, 63, 0, PROTOBUF_FIELD_OFFSET(Player, _impl_.id_)}},
@@ -409,6 +414,18 @@ const ::_pbi::TcParseTable<2, 4, 0, 35, 2> Player::_table_ = {
     // int32 ping = 3;
     {::_pbi::TcParser::SingularVarintNoZag1<::uint32_t, offsetof(Player, _impl_.ping_), 63>(),
      {24, 63, 0, PROTOBUF_FIELD_OFFSET(Player, _impl_.ping_)}},
+    // string region = 4;
+    {::_pbi::TcParser::FastUS1,
+     {34, 63, 0, PROTOBUF_FIELD_OFFSET(Player, _impl_.region_)}},
+    // int32 ping_na = 5;
+    {::_pbi::TcParser::SingularVarintNoZag1<::uint32_t, offsetof(Player, _impl_.ping_na_), 63>(),
+     {40, 63, 0, PROTOBUF_FIELD_OFFSET(Player, _impl_.ping_na_)}},
+    // int32 ping_eu = 6;
+    {::_pbi::TcParser::SingularVarintNoZag1<::uint32_t, offsetof(Player, _impl_.ping_eu_), 63>(),
+     {48, 63, 0, PROTOBUF_FIELD_OFFSET(Player, _impl_.ping_eu_)}},
+    // int32 ping_asia = 7;
+    {::_pbi::TcParser::SingularVarintNoZag1<::uint32_t, offsetof(Player, _impl_.ping_asia_), 63>(),
+     {56, 63, 0, PROTOBUF_FIELD_OFFSET(Player, _impl_.ping_asia_)}},
   }}, {{
     65535, 65535
   }}, {{
@@ -424,6 +441,15 @@ const ::_pbi::TcParseTable<2, 4, 0, 35, 2> Player::_table_ = {
     // string region = 4;
     {PROTOBUF_FIELD_OFFSET(Player, _impl_.region_), 0, 0,
     (0 | ::_fl::kFcSingular | ::_fl::kUtf8String | ::_fl::kRepAString)},
+    // int32 ping_na = 5;
+    {PROTOBUF_FIELD_OFFSET(Player, _impl_.ping_na_), 0, 0,
+    (0 | ::_fl::kFcSingular | ::_fl::kInt32)},
+    // int32 ping_eu = 6;
+    {PROTOBUF_FIELD_OFFSET(Player, _impl_.ping_eu_), 0, 0,
+    (0 | ::_fl::kFcSingular | ::_fl::kInt32)},
+    // int32 ping_asia = 7;
+    {PROTOBUF_FIELD_OFFSET(Player, _impl_.ping_asia_), 0, 0,
+    (0 | ::_fl::kFcSingular | ::_fl::kInt32)},
   }},
   // no aux_entries
   {{
@@ -444,8 +470,8 @@ PROTOBUF_NOINLINE void Player::Clear() {
   _impl_.id_.ClearToEmpty();
   _impl_.region_.ClearToEmpty();
   ::memset(&_impl_.mmr_, 0, static_cast<::size_t>(
-      reinterpret_cast<char*>(&_impl_.ping_) -
-      reinterpret_cast<char*>(&_impl_.mmr_)) + sizeof(_impl_.ping_));
+      reinterpret_cast<char*>(&_impl_.ping_asia_) -
+      reinterpret_cast<char*>(&_impl_.mmr_)) + sizeof(_impl_.ping_asia_));
   _internal_metadata_.Clear<::google::protobuf::UnknownFieldSet>();
 }
 
@@ -494,6 +520,27 @@ PROTOBUF_NOINLINE void Player::Clear() {
             target = stream->WriteStringMaybeAliased(4, _s, target);
           }
 
+          // int32 ping_na = 5;
+          if (this_._internal_ping_na() != 0) {
+            target = ::google::protobuf::internal::WireFormatLite::
+                WriteInt32ToArrayWithField<5>(
+                    stream, this_._internal_ping_na(), target);
+          }
+
+          // int32 ping_eu = 6;
+          if (this_._internal_ping_eu() != 0) {
+            target = ::google::protobuf::internal::WireFormatLite::
+                WriteInt32ToArrayWithField<6>(
+                    stream, this_._internal_ping_eu(), target);
+          }
+
+          // int32 ping_asia = 7;
+          if (this_._internal_ping_asia() != 0) {
+            target = ::google::protobuf::internal::WireFormatLite::
+                WriteInt32ToArrayWithField<7>(
+                    stream, this_._internal_ping_asia(), target);
+          }
+
           if (PROTOBUF_PREDICT_FALSE(this_._internal_metadata_.have_unknown_fields())) {
             target =
                 ::_pbi::WireFormat::InternalSerializeUnknownFieldsToArray(
@@ -539,6 +586,21 @@ PROTOBUF_NOINLINE void Player::Clear() {
               total_size += ::_pbi::WireFormatLite::Int32SizePlusOne(
                   this_._internal_ping());
             }
+            // int32 ping_na = 5;
+            if (this_._internal_ping_na() != 0) {
+              total_size += ::_pbi::WireFormatLite::Int32SizePlusOne(
+                  this_._internal_ping_na());
+            }
+            // int32 ping_eu = 6;
+            if (this_._internal_ping_eu() != 0) {
+              total_size += ::_pbi::WireFormatLite::Int32SizePlusOne(
+                  this_._internal_ping_eu());
+            }
+            // int32 ping_asia = 7;
+            if (this_._internal_ping_asia() != 0) {
+              total_size += ::_pbi::WireFormatLite::Int32SizePlusOne(
+                  this_._internal_ping_asia());
+            }
           }
           return this_.MaybeComputeUnknownFieldsSize(total_size,
                                                      &this_._impl_._cached_size_);
@@ -564,6 +626,15 @@ void Player::MergeImpl(::google::protobuf::MessageLite& to_msg, const ::google::
   if (from._internal_ping() != 0) {
     _this->_impl_.ping_ = from._impl_.ping_;
   }
+  if (from._internal_ping_na() != 0) {
+    _this->_impl_.ping_na_ = from._impl_.ping_na_;
+  }
+  if (from._internal_ping_eu() != 0) {
+    _this->_impl_.ping_eu_ = from._impl_.ping_eu_;
+  }
+  if (from._internal_ping_asia() != 0) {
+    _this->_impl_.ping_asia_ = from._impl_.ping_asia_;
+  }
   _this->_internal_metadata_.MergeFrom<::google::protobuf::UnknownFieldSet>(from._internal_metadata_);
 }
 
@@ -583,8 +654,8 @@ void Player::InternalSwap(Player* PROTOBUF_RESTRICT other) {
   ::_pbi::ArenaStringPtr::InternalSwap(&_impl_.id_, &other->_impl_.id_, arena);
   ::_pbi::ArenaStringPtr::InternalSwap(&_impl_.region_, &other->_impl_.region_, arena);
   ::google::protobuf::internal::memswap<
-      PROTOBUF_FIELD_OFFSET(Player, _impl_.ping_)
-      + sizeof(Player::_impl_.ping_)
+      PROTOBUF_FIELD_OFFSET(Player, _impl_.ping_asia_)
+      + sizeof(Player::_impl_.ping_asia_)
       - PROTOBUF_FIELD_OFFSET(Player, _impl_.mmr_)>(
           reinterpret_cast<char*>(&_impl_.mmr_),
           reinterpret_cast<char*>(&other->_impl_.mmr_));

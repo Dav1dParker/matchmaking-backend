@@ -102,6 +102,41 @@ EngineConfig EngineConfig::LoadFromFile(const std::string& path) {
         config.max_allowed_mmr_diff = max_diff_value;
     }
 
+    int base_window_value = config.base_mmr_window;
+    if (ExtractInt(content, "base_mmr_window", base_window_value)) {
+        config.base_mmr_window = base_window_value;
+    }
+
+    int relax_mmr_value = config.mmr_relax_per_second;
+    if (ExtractInt(content, "mmr_relax_per_second", relax_mmr_value)) {
+        config.mmr_relax_per_second = relax_mmr_value;
+    }
+
+    int max_window_value = config.max_mmr_window;
+    if (ExtractInt(content, "max_mmr_window", max_window_value)) {
+        config.max_mmr_window = max_window_value;
+    }
+
+    int diff_relax_value = config.mmr_diff_relax_per_second;
+    if (ExtractInt(content, "mmr_diff_relax_per_second", diff_relax_value)) {
+        config.mmr_diff_relax_per_second = diff_relax_value;
+    }
+
+    int max_relaxed_diff_value = config.max_relaxed_mmr_diff;
+    if (ExtractInt(content, "max_relaxed_mmr_diff", max_relaxed_diff_value)) {
+        config.max_relaxed_mmr_diff = max_relaxed_diff_value;
+    }
+
+    int cross_region_step_value = config.cross_region_step_ms;
+    if (ExtractInt(content, "cross_region_step_ms", cross_region_step_value)) {
+        config.cross_region_step_ms = cross_region_step_value;
+    }
+
+    int good_region_ping_value = config.good_region_ping_ms;
+    if (ExtractInt(content, "good_region_ping_ms", good_region_ping_value)) {
+        config.good_region_ping_ms = good_region_ping_value;
+    }
+
     return config;
 }
 
