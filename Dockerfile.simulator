@@ -6,17 +6,23 @@ RUN apt-get update && apt-get install -y \
     ninja-build \
     git \
     pkg-config \
+    curl \
+    zip \
+    unzip \
+    tar \
  && rm -rf /var/lib/apt/lists/*
 
 WORKDIR /opt
 RUN git clone https://github.com/microsoft/vcpkg.git
 WORKDIR /opt/vcpkg
 RUN ./bootstrap-vcpkg.sh
+RUN ./vcpkg install grpc protobuf gtest
 
 WORKDIR /app
 COPY . .
 
-RUN cmake -B build -S . -G Ninja \
+RUN rm -rf build && \
+    cmake -B build -S . -G Ninja \
     -DCMAKE_BUILD_TYPE=Release \
     -DCMAKE_TOOLCHAIN_FILE=/opt/vcpkg/scripts/buildsystems/vcpkg.cmake
 RUN cmake --build build --target match_simulator --config Release
@@ -28,4 +34,3 @@ COPY --from=build /app/build/match_simulator /app/match_simulator
 COPY config config
 
 CMD ["./match_simulator"]
-

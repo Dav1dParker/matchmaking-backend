@@ -1,5 +1,6 @@
 #include "simulator/SimConfig.h"
 
+#include <cstdlib>
 #include <fstream>
 #include <string>
 
@@ -80,6 +81,11 @@ SimConfig SimConfig::LoadFromFile(const std::string& path) {
     std::string address_value = config.target_address;
     if (ExtractString(content, "target_address", address_value)) {
         config.target_address = address_value;
+    }
+
+    const char* env_target = std::getenv("SIM_TARGET_ADDRESS");
+    if (env_target && *env_target) {
+        config.target_address = env_target;
     }
 
     return config;
