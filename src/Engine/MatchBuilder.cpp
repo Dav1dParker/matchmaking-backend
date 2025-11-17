@@ -8,7 +8,8 @@
 using namespace matchmaking;
 
 bool MatchBuilder::BuildMatch(std::deque<PlayerEntry>& queue,
-                              Match& outMatch)
+                              Match& outMatch,
+                              const EngineConfig& config)
 {
     if (queue.size() < 10)
         return false;
@@ -33,12 +34,20 @@ bool MatchBuilder::BuildMatch(std::deque<PlayerEntry>& queue,
     const int min_mmr = seed_mmr - window;
     const int max_mmr = seed_mmr + window;
 
+    int ping_window = config.max_ping_ms +
+                      config.ping_relax_per_second * waited_seconds;
+    if (ping_window > config.max_ping_ms_cap) {
+        ping_window = config.max_ping_ms_cap;
+    }
+
     std::vector<std::size_t> eligible_indices;
     eligible_indices.reserve(queue.size());
 
     for (std::size_t i = 0; i < queue.size(); ++i) {
         int mmr = queue[i].player.mmr();
-        if (mmr >= min_mmr && mmr <= max_mmr) {
+        int ping = queue[i].player.ping();
+        if (mmr >= min_mmr && mmr <= max_mmr &&
+            ping <= ping_window) {
             eligible_indices.push_back(i);
             if (eligible_indices.size() == 10)
                 break;

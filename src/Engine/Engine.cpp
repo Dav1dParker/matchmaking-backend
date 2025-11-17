@@ -63,7 +63,7 @@ void Engine::TickLoop() {
             matchmaking::Match match;
 
             while (true) {
-                if (MatchBuilder::BuildMatch(queue, match)) {
+                if (MatchBuilder::BuildMatch(queue, match, config_)) {
                     std::cout << "Created match " << match.match_id()
                               << " in region " << region
                               << " with " << match.players_size()

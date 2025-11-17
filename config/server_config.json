@@ -1,5 +1,8 @@
 {
   "tick_interval_ms": 100,
-  "matches_path": "matches.jsonl"
+  "matches_path": "matches.jsonl",
+  "max_ping_ms": 80,
+  "ping_relax_per_second": 10,
+  "max_ping_ms_cap": 200
 }
 

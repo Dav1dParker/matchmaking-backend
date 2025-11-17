@@ -77,6 +77,21 @@ EngineConfig EngineConfig::LoadFromFile(const std::string& path) {
         config.matches_path = matches_value;
     }
 
+    int max_ping_value = config.max_ping_ms;
+    if (ExtractInt(content, "max_ping_ms", max_ping_value)) {
+        config.max_ping_ms = max_ping_value;
+    }
+
+    int relax_value = config.ping_relax_per_second;
+    if (ExtractInt(content, "ping_relax_per_second", relax_value)) {
+        config.ping_relax_per_second = relax_value;
+    }
+
+    int ping_cap_value = config.max_ping_ms_cap;
+    if (ExtractInt(content, "max_ping_ms_cap", ping_cap_value)) {
+        config.max_ping_ms_cap = ping_cap_value;
+    }
+
     return config;
 }
 
