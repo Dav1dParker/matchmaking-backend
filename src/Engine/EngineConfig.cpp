@@ -92,6 +92,16 @@ EngineConfig EngineConfig::LoadFromFile(const std::string& path) {
         config.max_ping_ms_cap = ping_cap_value;
     }
 
+    int min_wait_value = config.min_wait_before_match_ms;
+    if (ExtractInt(content, "min_wait_before_match_ms", min_wait_value)) {
+        config.min_wait_before_match_ms = min_wait_value;
+    }
+
+    int max_diff_value = config.max_allowed_mmr_diff;
+    if (ExtractInt(content, "max_allowed_mmr_diff", max_diff_value)) {
+        config.max_allowed_mmr_diff = max_diff_value;
+    }
+
     return config;
 }
 

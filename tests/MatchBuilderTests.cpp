@@ -19,6 +19,8 @@ EngineConfig DefaultTestConfig() {
     cfg.max_ping_ms = 80;
     cfg.ping_relax_per_second = 10;
     cfg.max_ping_ms_cap = 200;
+    cfg.min_wait_before_match_ms = 0;
+    cfg.max_allowed_mmr_diff = 1000;
     return cfg;
 }
 
@@ -335,4 +337,53 @@ TEST(MatchBuilderTests, PingWindowIsCappedByMaxPingCap) {
 
     EXPECT_FALSE(built);
     EXPECT_EQ(queue.size(), 15u);
+}
+
+TEST(MatchBuilderTests, RejectsUnbalancedMatchBeforeMinWait) {
+    std::deque<PlayerEntry> queue;
+
+    EngineConfig config = DefaultTestConfig();
+    config.min_wait_before_match_ms = 30000;
+    config.max_allowed_mmr_diff = 0;
+
+    for (int i = 0; i < 10; ++i) {
+        Player p;
+        p.set_id("p" + std::to_string(i));
+        p.set_mmr(900 + i * 10);
+        p.set_ping(50);
+        p.set_region("NA");
+        queue.emplace_back(p);
+    }
+
+    Match match;
+    bool built = MatchBuilder::BuildMatch(queue, match, config);
+
+    EXPECT_FALSE(built);
+    EXPECT_EQ(queue.size(), 10u);
+}
+
+TEST(MatchBuilderTests, AcceptsUnbalancedMatchAfterMinWait) {
+    std::deque<PlayerEntry> queue;
+
+    EngineConfig config = DefaultTestConfig();
+    config.min_wait_before_match_ms = 30000;
+    config.max_allowed_mmr_diff = 0;
+
+    for (int i = 0; i < 10; ++i) {
+        Player p;
+        p.set_id("p" + std::to_string(i));
+        p.set_mmr(900 + i * 10);
+        p.set_ping(50);
+        p.set_region("NA");
+        queue.emplace_back(p);
+    }
+
+    queue.front().queuedAt -= std::chrono::milliseconds(31000);
+
+    Match match;
+    bool built = MatchBuilder::BuildMatch(queue, match, config);
+
+    EXPECT_TRUE(built);
+    EXPECT_EQ(match.players_size(), 10);
+    EXPECT_TRUE(queue.empty());
 }

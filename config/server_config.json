@@ -3,6 +3,8 @@
   "matches_path": "matches.jsonl",
   "max_ping_ms": 80,
   "ping_relax_per_second": 10,
-  "max_ping_ms_cap": 200
+  "max_ping_ms_cap": 200,
+  "min_wait_before_match_ms": 30000,
+  "max_allowed_mmr_diff": 300
 }
 

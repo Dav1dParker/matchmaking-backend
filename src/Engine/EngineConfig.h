@@ -10,6 +10,9 @@ struct EngineConfig {
     int ping_relax_per_second = 10;
     int max_ping_ms_cap = 200;
 
+    int min_wait_before_match_ms = 30000;
+    int max_allowed_mmr_diff = 300;
+
     static EngineConfig LoadFromFile(const std::string& path);
 };
 

@@ -102,6 +102,18 @@ bool MatchBuilder::BuildMatch(std::deque<PlayerEntry>& queue,
         }
     }
 
+    int avg_a = sum_a / static_cast<int>(team_a.size());
+    int avg_b = sum_b / static_cast<int>(team_b.size());
+    int diff = avg_a - avg_b;
+    if (diff < 0) {
+        diff = -diff;
+    }
+
+    if (waited_ms < config.min_wait_before_match_ms &&
+        diff > config.max_allowed_mmr_diff) {
+        return false;
+    }
+
     std::vector<bool> selected(queue.size(), false);
     for (std::size_t idx : team_a) {
         selected[idx] = true;

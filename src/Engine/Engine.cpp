@@ -47,10 +47,14 @@ bool Engine::RemovePlayer(const std::string& id) {
     return false;
 }
 
-std::vector<Match> Engine::GetNewMatches() {
+std::vector<Match> Engine::GetMatchesForPlayer(const std::string& id) {
     std::scoped_lock lock(mtx_);
-    auto result = newMatches_;
-    newMatches_.clear();
+    auto it = pendingMatches_.find(id);
+    if (it == pendingMatches_.end()) {
+        return {};
+    }
+    auto result = it->second;
+    pendingMatches_.erase(it);
     return result;
 }
 
@@ -68,7 +72,10 @@ void Engine::TickLoop() {
                               << " in region " << region
                               << " with " << match.players_size()
                               << " players" << std::endl;
-                    newMatches_.push_back(match);
+                    for (int i = 0; i < match.players_size(); ++i) {
+                        const auto& p = match.players(i);
+                        pendingMatches_[p.id()].push_back(match);
+                    }
                     persistence_.Append(match);
                     match = matchmaking::Match();  // reset for next
                 } else {

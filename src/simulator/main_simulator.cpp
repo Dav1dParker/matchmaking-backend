@@ -34,9 +34,16 @@ int main() {
               << ", total_players=" << config.total_players << std::endl;
 
     SimulatorClient client(config.target_address);
+    std::vector<std::thread> stream_threads;
+    stream_threads.reserve(config.total_players);
 
     for (int i = 0; i < config.total_players; ++i) {
         auto player = MakeDummyPlayer(i);
+
+        std::string player_id = player.id();
+        stream_threads.emplace_back([player_id, &client]() {
+            client.StreamMatches(player_id);
+        });
 
         bool ok = client.Enqueue(player);
         if (!ok) {
@@ -51,6 +58,13 @@ int main() {
         std::this_thread::sleep_for(std::chrono::milliseconds(config.delay_ms_between_players));
     }
 
-    std::cout << "Simulation finished.\n";
+    std::cout << "Simulation finished, waiting for match streams.\n";
+
+    for (auto& t : stream_threads) {
+        if (t.joinable()) {
+            t.join();
+        }
+    }
+
     return 0;
 }
