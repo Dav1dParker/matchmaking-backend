@@ -1,4 +1,5 @@
 #include <deque>
+#include <chrono>
 
 #include <gtest/gtest.h>
 
@@ -248,6 +249,86 @@ TEST(MatchBuilderTests, NotEnoughLowPingPlayersNoMatch) {
         p.set_region("NA");
         queue.emplace_back(p);
     }
+
+    Match match;
+    bool built = MatchBuilder::BuildMatch(queue, match, config);
+
+    EXPECT_FALSE(built);
+    EXPECT_EQ(queue.size(), 15u);
+}
+
+TEST(MatchBuilderTests, PingRelaxationOverTimeAllowsHighPingPlayers) {
+    std::deque<PlayerEntry> queue;
+
+    EngineConfig config = DefaultTestConfig();
+    config.max_ping_ms = 80;
+    config.ping_relax_per_second = 10;
+    config.max_ping_ms_cap = 200;
+
+    Player seed;
+    seed.set_id("seed");
+    seed.set_mmr(1500);
+    seed.set_ping(150);
+    seed.set_region("NA");
+    queue.emplace_back(seed);
+
+    for (int i = 0; i < 9; ++i) {
+        Player p;
+        p.set_id("high" + std::to_string(i));
+        p.set_mmr(1500);
+        p.set_ping(150);
+        p.set_region("NA");
+        queue.emplace_back(p);
+    }
+
+    queue.front().queuedAt -= std::chrono::seconds(10);
+
+    Match match;
+    bool built = MatchBuilder::BuildMatch(queue, match, config);
+
+    ASSERT_TRUE(built);
+    ASSERT_EQ(match.players_size(), 10);
+    EXPECT_TRUE(queue.empty());
+
+    for (int i = 0; i < match.players_size(); ++i) {
+        EXPECT_GE(match.players(i).ping(), 100);
+    }
+}
+
+TEST(MatchBuilderTests, PingWindowIsCappedByMaxPingCap) {
+    std::deque<PlayerEntry> queue;
+
+    EngineConfig config = DefaultTestConfig();
+    config.max_ping_ms = 50;
+    config.ping_relax_per_second = 50;
+    config.max_ping_ms_cap = 120;
+
+    Player seed;
+    seed.set_id("seed");
+    seed.set_mmr(1500);
+    seed.set_ping(100);
+    seed.set_region("NA");
+    queue.emplace_back(seed);
+
+    for (int i = 0; i < 4; ++i) {
+        Player p;
+        p.set_id("ok" + std::to_string(i));
+        p.set_mmr(1500);
+        p.set_ping(100);
+        p.set_region("NA");
+        queue.emplace_back(p);
+    }
+
+    for (int i = 0; i < 10; ++i) {
+        Player p;
+        p.set_id("too_high" + std::to_string(i));
+        p.set_mmr(1500);
+        p.set_ping(200);
+        p.set_region("NA");
+        queue.emplace_back(p);
+    }
+
+    queue.front().queuedAt -= std::chrono::seconds(10);
 
     Match match;
     bool built = MatchBuilder::BuildMatch(queue, match, config);
