@@ -1,0 +1,9 @@
+FROM ubuntu:22.04
+
+WORKDIR /app
+COPY build/matchmaker_server /app/matchmaker_server
+COPY config config
+
+EXPOSE 50051
+CMD ["./matchmaker_server"]
+

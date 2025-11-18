@@ -140,3 +140,29 @@ EngineConfig EngineConfig::LoadFromFile(const std::string& path) {
     return config;
 }
 
+bool EngineConfig::SaveToFile(const std::string& path) const {
+    std::ofstream out(path, std::ios::trunc);
+    if (!out.is_open()) {
+        return false;
+    }
+
+    out << "{\n";
+    out << "  \"tick_interval_ms\": " << tick_interval_ms << ",\n";
+    out << "  \"matches_path\": \"" << matches_path << "\",\n";
+    out << "  \"max_ping_ms\": " << max_ping_ms << ",\n";
+    out << "  \"ping_relax_per_second\": " << ping_relax_per_second << ",\n";
+    out << "  \"max_ping_ms_cap\": " << max_ping_ms_cap << ",\n";
+    out << "  \"min_wait_before_match_ms\": " << min_wait_before_match_ms << ",\n";
+    out << "  \"max_allowed_mmr_diff\": " << max_allowed_mmr_diff << ",\n";
+    out << "  \"base_mmr_window\": " << base_mmr_window << ",\n";
+    out << "  \"mmr_relax_per_second\": " << mmr_relax_per_second << ",\n";
+    out << "  \"max_mmr_window\": " << max_mmr_window << ",\n";
+    out << "  \"mmr_diff_relax_per_second\": " << mmr_diff_relax_per_second << ",\n";
+    out << "  \"max_relaxed_mmr_diff\": " << max_relaxed_mmr_diff << ",\n";
+    out << "  \"cross_region_step_ms\": " << cross_region_step_ms << ",\n";
+    out << "  \"good_region_ping_ms\": " << good_region_ping_ms << "\n";
+    out << "}\n";
+
+    return true;
+}
+

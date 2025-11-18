@@ -24,5 +24,6 @@ struct EngineConfig {
     int good_region_ping_ms = 100;
 
     static EngineConfig LoadFromFile(const std::string& path);
+    bool SaveToFile(const std::string& path) const;
 };
 

@@ -8,5 +8,6 @@ struct SimConfig {
     std::string target_address = "localhost:50051";
 
     static SimConfig LoadFromFile(const std::string& path);
+    bool SaveToFile(const std::string& path) const;
 };
 
