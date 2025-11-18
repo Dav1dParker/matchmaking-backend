@@ -149,6 +149,10 @@ int main() {
 
         int choice = 0;
         if (!(std::cin >> choice)) {
+            if (std::cin.eof()) {
+                config.SaveToFile("config/sim_config.json");
+                return RunSimulator(config);
+            }
             std::cin.clear();
             std::cin.ignore(std::numeric_limits<std::streamsize>::max(), '\n');
             continue;
