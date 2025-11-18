@@ -11,7 +11,7 @@ The system is split into two C++20 executables:
 
 There is no real game; the focus is on backend logic, concurrency, and basic infrastructure (CI, Docker, CD).
 
-## Matchmaking Rules (current)
+## Matchmaking Rules
 
 - Games are always 5 vs 5 (10 players per match).
 - Supported regions: `NA`, `EU`, `ASIA`.
@@ -34,7 +34,7 @@ There is no real game; the focus is on backend logic, concurrency, and basic inf
 
 The server records basic match statistics to an append-only `matches.jsonl` file for later inspection and analysis. The path and tick interval are configured via `config/server_config.json`.
 
-## Architecture (current)
+## Architecture
 
 - **Protocol Buffers / gRPC**
   - `proto/matchmaker.proto` defines:
@@ -122,27 +122,21 @@ Typical local usage (from the project root after a build):
 
 Prebuilt images are published to GitHub Container Registry (GHCR) on pushes to `main`:
 
-- Server: `ghcr.io/<your-username>/matchmaking-server:latest`
-- Simulator: `ghcr.io/<your-username>/matchmaking-simulator:latest`
-
-If the images are private, log in with a Personal Access Token (PAT) that has `read:packages`:
-
-```bash
-docker login ghcr.io -u <your-username>
-```
+- Server: `ghcr.io/dav1dparker/matchmaking-server:latest`
+- Simulator: `ghcr.io/dav1dparker/matchmaking-simulator:latest`
 
 ### Running server and simulator with Docker
 
 Run the server (interactive menu, port 50051 exposed):
 
 ```bash
-docker run -it --rm -p 50051:50051 ghcr.io/<your-username>/matchmaking-server:latest
+docker run -it --rm -p 50051:50051 ghcr.io/dav1dparker/matchmaking-server:latest
 ```
 
 Run the simulator in another terminal:
 
 ```bash
-docker run -it --rm ghcr.io/<your-username>/matchmaking-simulator:latest
+docker run -it --rm ghcr.io/dav1dparker/matchmaking-simulator:latest
 ```
 
 To run server and simulator so they can see each other inside Docker, use a user-defined network and point the simulator at the server container name:
@@ -154,12 +148,12 @@ docker run -it --rm \
   --name match-server \
   --network matchmaking \
   -p 50051:50051 \
-  ghcr.io/<your-username>/matchmaking-server:latest
+  ghcr.io/dav1dparker/matchmaking-server:latest
 
 docker run -it --rm \
   --network matchmaking \
   -e SIM_TARGET_ADDRESS=match-server:50051 \
-  ghcr.io/<your-username>/matchmaking-simulator:latest
+  ghcr.io/dav1dparker/matchmaking-simulator:latest
 ```
 
 To override configuration in the container with local files, mount your `config` directory into `/app/config`:
@@ -167,7 +161,7 @@ To override configuration in the container with local files, mount your `config`
 ```bash
 docker run -it --rm \
   -v /path/to/config:/app/config:ro \
-  ghcr.io/<your-username>/matchmaking-server:latest
+  ghcr.io/dav1dparker/matchmaking-server:latest
 ```
 
 ## CI status and future work
@@ -184,4 +178,3 @@ docker run -it --rm \
   - Extend simulator configuration to support more realistic arrival patterns and per-region controls.
 
 This project is intentionally compact but structured like a real service, to demonstrate backend design, concurrency, gRPC usage, CI, and Docker/CD practices.
-
