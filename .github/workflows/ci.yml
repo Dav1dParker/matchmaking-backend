@@ -56,10 +56,6 @@ jobs:
     runs-on: ubuntu-latest
     needs: build
     if: github.ref == 'refs/heads/main'
-    env:
-      REGISTRY: ghcr.io
-      SERVER_IMAGE: ghcr.io/${{ github.repository_owner }}/matchmaking-server
-      SIMULATOR_IMAGE: ghcr.io/${{ github.repository_owner }}/matchmaking-simulator
 
     steps:
       - name: Checkout repository
@@ -74,18 +70,22 @@ jobs:
       - name: Log in to GitHub Container Registry
         uses: docker/login-action@v3
         with:
-          registry: ${{ env.REGISTRY }}
+          registry: ghcr.io
           username: ${{ github.actor }}
           password: ${{ secrets.GITHUB_TOKEN }}
 
       - name: Build and push server image
         run: |
-          docker build -f Dockerfile.server.runtime -t "$SERVER_IMAGE:latest" .
-          docker push "$SERVER_IMAGE:latest"
+          OWNER_LC=$(echo "${GITHUB_REPOSITORY_OWNER}" | tr '[:upper:]' '[:lower:]')
+          SERVER_IMAGE="ghcr.io/${OWNER_LC}/matchmaking-server"
+          docker build -f Dockerfile.server.runtime -t "${SERVER_IMAGE}:latest" .
+          docker push "${SERVER_IMAGE}:latest"
 
       - name: Build and push simulator image
         run: |
-          docker build -f Dockerfile.simulator.runtime -t "$SIMULATOR_IMAGE:latest" .
-          docker push "$SIMULATOR_IMAGE:latest"
+          OWNER_LC=$(echo "${GITHUB_REPOSITORY_OWNER}" | tr '[:upper:]' '[:lower:]')
+          SIMULATOR_IMAGE="ghcr.io/${OWNER_LC}/matchmaking-simulator"
+          docker build -f Dockerfile.simulator.runtime -t "${SIMULATOR_IMAGE}:latest" .
+          docker push "${SIMULATOR_IMAGE}:latest"
 
 
