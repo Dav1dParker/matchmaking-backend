@@ -91,3 +91,18 @@ SimConfig SimConfig::LoadFromFile(const std::string& path) {
     return config;
 }
 
+bool SimConfig::SaveToFile(const std::string& path) const {
+    std::ofstream out(path, std::ios::trunc);
+    if (!out.is_open()) {
+        return false;
+    }
+
+    out << "{\n";
+    out << "  \"target_address\": \"" << target_address << "\",\n";
+    out << "  \"total_players\": " << total_players << ",\n";
+    out << "  \"delay_ms_between_players\": " << delay_ms_between_players << "\n";
+    out << "}\n";
+
+    return true;
+}
+
