@@ -4,5 +4,6 @@ WORKDIR /app
 COPY build/match_simulator /app/match_simulator
 COPY config config
 
-CMD ["./match_simulator"]
+RUN chmod +x /app/match_simulator
 
+CMD ["./match_simulator"]
