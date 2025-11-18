@@ -2,7 +2,6 @@
 #include <limits>
 #include <grpcpp/grpcpp.h>
 #include "server.h"
-#include "Engine/Engine.h"
 #include "Engine/EngineConfig.h"
 
 namespace {
