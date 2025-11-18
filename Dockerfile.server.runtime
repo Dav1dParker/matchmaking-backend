@@ -4,6 +4,7 @@ WORKDIR /app
 COPY build/matchmaker_server /app/matchmaker_server
 COPY config config
 
+RUN chmod +x /app/matchmaker_server
+
 EXPOSE 50051
 CMD ["./matchmaker_server"]
-
