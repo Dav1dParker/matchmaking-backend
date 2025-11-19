@@ -137,6 +137,11 @@ EngineConfig EngineConfig::LoadFromFile(const std::string& path) {
         config.good_region_ping_ms = good_region_ping_value;
     }
 
+    int emergency_wait_value = config.emergency_match_wait_ms;
+    if (ExtractInt(content, "emergency_match_wait_ms", emergency_wait_value)) {
+        config.emergency_match_wait_ms = emergency_wait_value;
+    }
+
     return config;
 }
 
@@ -160,7 +165,8 @@ bool EngineConfig::SaveToFile(const std::string& path) const {
     out << "  \"mmr_diff_relax_per_second\": " << mmr_diff_relax_per_second << ",\n";
     out << "  \"max_relaxed_mmr_diff\": " << max_relaxed_mmr_diff << ",\n";
     out << "  \"cross_region_step_ms\": " << cross_region_step_ms << ",\n";
-    out << "  \"good_region_ping_ms\": " << good_region_ping_ms << "\n";
+    out << "  \"good_region_ping_ms\": " << good_region_ping_ms << ",\n";
+    out << "  \"emergency_match_wait_ms\": " << emergency_match_wait_ms << "\n";
     out << "}\n";
 
     return true;

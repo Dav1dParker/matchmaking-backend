@@ -76,127 +76,201 @@ bool MatchBuilder::BuildMatch(std::deque<PlayerEntry>& queue,
                               const std::string& region,
                               MatchMetrics* metrics)
 {
-    if (queue.size() < 10)
+    if (queue.size() < 10) {
         return false;
+    }
 
     auto now = std::chrono::steady_clock::now();
+    const std::size_t n = queue.size();
 
-    std::size_t seed_index = queue.size();
-    long long waited_ms = 0;
-
-    for (std::size_t i = 0; i < queue.size(); ++i) {
+    // Precompute wait times for all players once.
+    std::vector<long long> wait_ms(n, 0);
+    for (std::size_t i = 0; i < n; ++i) {
         auto w = std::chrono::duration_cast<std::chrono::milliseconds>(now - queue[i].queuedAt).count();
         if (w < 0) {
             w = 0;
         }
-        if (IsRegionAllowedForPlayer(queue[i], region, w, config)) {
-            seed_index = i;
-            waited_ms = w;
-            break;
-        }
+        wait_ms[i] = w;
     }
 
-    if (seed_index == queue.size()) {
-        return false;
-    }
+    struct SeedChoice {
+        bool valid = false;
+        std::size_t seed_index = 0;
+        std::vector<std::size_t> selected_indices;
+        long long seed_wait_ms = 0;
+        double avg_wait_ms = 0.0;
+        int spread = 0;
+    };
 
-    const PlayerEntry& seed_entry = queue[seed_index];
-    if (waited_ms < 0) {
-        waited_ms = 0;
-    }
+    SeedChoice best;
 
-    int relax_seconds = 0;
-    if (waited_ms > config.min_wait_before_match_ms) {
-        relax_seconds = static_cast<int>((waited_ms - config.min_wait_before_match_ms) / 1000);
-    }
+    // Consider every player as a potential seed for this region.
+    for (std::size_t seed_index = 0; seed_index < n; ++seed_index) {
+        long long waited_ms = wait_ms[seed_index];
 
-    int window = config.base_mmr_window +
-                 config.mmr_relax_per_second * relax_seconds;
-    if (window > config.max_mmr_window) {
-        window = config.max_mmr_window;
-    }
-
-    const int seed_mmr = seed_entry.player.mmr();
-    const int min_mmr = seed_mmr - window;
-    const int max_mmr = seed_mmr + window;
-
-    int ping_window = config.max_ping_ms +
-                      config.ping_relax_per_second * relax_seconds;
-    if (ping_window > config.max_ping_ms_cap) {
-        ping_window = config.max_ping_ms_cap;
-    }
-
-    std::vector<std::size_t> eligible_indices;
-    eligible_indices.reserve(queue.size());
-
-    for (std::size_t i = 0; i < queue.size(); ++i) {
-        auto wait_i = std::chrono::duration_cast<std::chrono::milliseconds>(now - queue[i].queuedAt).count();
-        if (wait_i < 0) {
-            wait_i = 0;
-        }
-        if (!IsRegionAllowedForPlayer(queue[i], region, wait_i, config)) {
+        if (!IsRegionAllowedForPlayer(queue[seed_index], region, waited_ms, config)) {
             continue;
         }
 
-        int mmr = queue[i].player.mmr();
-        int ping = GetRegionPing(queue[i].player, region);
-        if (mmr >= min_mmr && mmr <= max_mmr &&
-            ping <= ping_window) {
-            eligible_indices.push_back(i);
+        int relax_seconds = 0;
+        if (waited_ms > config.min_wait_before_match_ms) {
+            relax_seconds = static_cast<int>((waited_ms - config.min_wait_before_match_ms) / 1000);
+        }
+
+        int window = config.base_mmr_window +
+                     config.mmr_relax_per_second * relax_seconds;
+        if (window > config.max_mmr_window) {
+            window = config.max_mmr_window;
+        }
+
+        const int seed_mmr = queue[seed_index].player.mmr();
+        const int min_mmr = seed_mmr - window;
+        const int max_mmr = seed_mmr + window;
+
+        int ping_window = config.max_ping_ms +
+                          config.ping_relax_per_second * relax_seconds;
+        if (ping_window > config.max_ping_ms_cap) {
+            ping_window = config.max_ping_ms_cap;
+        }
+
+        std::vector<std::size_t> eligible_indices;
+        eligible_indices.reserve(n);
+
+        for (std::size_t i = 0; i < n; ++i) {
+            long long wait_i = wait_ms[i];
+            if (!IsRegionAllowedForPlayer(queue[i], region, wait_i, config)) {
+                continue;
+            }
+
+            int mmr = queue[i].player.mmr();
+            int ping = GetRegionPing(queue[i].player, region);
+            if (mmr >= min_mmr && mmr <= max_mmr &&
+                ping <= ping_window) {
+                eligible_indices.push_back(i);
+            }
+        }
+
+        if (eligible_indices.size() < 10) {
+            continue;
+        }
+
+        struct Candidate {
+            std::size_t index;
+            int mmr;
+        };
+
+        std::vector<Candidate> all_candidates;
+        all_candidates.reserve(eligible_indices.size());
+        for (std::size_t idx : eligible_indices) {
+            all_candidates.push_back(Candidate{idx, queue[idx].player.mmr()});
+        }
+
+        std::sort(all_candidates.begin(), all_candidates.end(),
+                  [](const Candidate& a, const Candidate& b) {
+                      return a.mmr < b.mmr;
+                  });
+
+        int best_start_for_seed = -1;
+        int best_spread_for_seed = std::numeric_limits<int>::max();
+        for (std::size_t i = 0; i + 9 < all_candidates.size(); ++i) {
+            int spread = all_candidates[i + 9].mmr - all_candidates[i].mmr;
+            if (spread < best_spread_for_seed) {
+                best_spread_for_seed = spread;
+                best_start_for_seed = static_cast<int>(i);
+            }
+        }
+
+        if (best_start_for_seed < 0) {
+            continue;
+        }
+
+        int allowed_spread = config.max_allowed_mmr_diff;
+        if (waited_ms > config.min_wait_before_match_ms) {
+            allowed_spread += config.mmr_diff_relax_per_second * relax_seconds;
+            if (allowed_spread > config.max_relaxed_mmr_diff) {
+                allowed_spread = config.max_relaxed_mmr_diff;
+            }
+        }
+
+        if (best_spread_for_seed > allowed_spread) {
+            continue;
+        }
+
+        std::vector<std::size_t> selected_indices;
+        selected_indices.reserve(10);
+        long long sum_wait_ms = 0;
+
+        for (int j = 0; j < 10; ++j) {
+            std::size_t idx = all_candidates[best_start_for_seed + j].index;
+            selected_indices.push_back(idx);
+            sum_wait_ms += wait_ms[idx];
+        }
+
+        double avg_wait_ms = static_cast<double>(sum_wait_ms) / 10.0;
+
+        bool take = false;
+        if (!best.valid) {
+            take = true;
+        } else if (avg_wait_ms > best.avg_wait_ms) {
+            take = true;
+        } else if (avg_wait_ms == best.avg_wait_ms &&
+                   best_spread_for_seed < best.spread) {
+            take = true;
+        }
+
+        if (take) {
+            best.valid = true;
+            best.seed_index = seed_index;
+            best.selected_indices = std::move(selected_indices);
+            best.seed_wait_ms = waited_ms;
+            best.avg_wait_ms = avg_wait_ms;
+            best.spread = best_spread_for_seed;
         }
     }
 
-    if (eligible_indices.size() < 10)
-        return false;
+    if (!best.valid) {
+        long long emergency_ms = config.emergency_match_wait_ms;
+        if (region == "NA" && emergency_ms > 0) {
+            std::vector<std::size_t> long_wait_indices;
+            long_wait_indices.reserve(n);
+            for (std::size_t i = 0; i < n; ++i) {
+                if (wait_ms[i] >= emergency_ms) {
+                    long_wait_indices.push_back(i);
+                }
+            }
+            if (long_wait_indices.size() >= 10) {
+                best.valid = true;
+                best.seed_index = long_wait_indices[0];
+                best.selected_indices.assign(long_wait_indices.begin(),
+                                             long_wait_indices.begin() + 10);
+                long long sum_wait = 0;
+                for (std::size_t idx : best.selected_indices) {
+                    sum_wait += wait_ms[idx];
+                }
+                best.avg_wait_ms = static_cast<double>(sum_wait) / 10.0;
+                best.spread = 0;
+            }
+        }
+        if (!best.valid) {
+            return false;
+        }
+    }
 
     outMatch.set_match_id("match_" + std::to_string(rand()));
 
-    struct Candidate {
+    struct TeamCandidate {
         std::size_t index;
         int mmr;
     };
 
-    std::vector<Candidate> all_candidates;
-    all_candidates.reserve(eligible_indices.size());
-    for (std::size_t idx : eligible_indices) {
-        all_candidates.push_back(Candidate{idx, queue[idx].player.mmr()});
-    }
-
-    std::sort(all_candidates.begin(), all_candidates.end(),
-              [](const Candidate& a, const Candidate& b) {
-                  return a.mmr < b.mmr;
-              });
-
-    int best_start = 0;
-    int best_spread = std::numeric_limits<int>::max();
-    for (std::size_t i = 0; i + 9 < all_candidates.size(); ++i) {
-        int spread = all_candidates[i + 9].mmr - all_candidates[i].mmr;
-        if (spread < best_spread) {
-            best_spread = spread;
-            best_start = static_cast<int>(i);
-        }
-    }
-
-    int allowed_spread = config.max_allowed_mmr_diff;
-    if (waited_ms > config.min_wait_before_match_ms) {
-        allowed_spread += config.mmr_diff_relax_per_second * relax_seconds;
-        if (allowed_spread > config.max_relaxed_mmr_diff) {
-            allowed_spread = config.max_relaxed_mmr_diff;
-        }
-    }
-
-    if (best_spread > allowed_spread) {
-        return false;
-    }
-
-    std::vector<Candidate> candidates;
+    std::vector<TeamCandidate> candidates;
     candidates.reserve(10);
-    for (int j = 0; j < 10; ++j) {
-        candidates.push_back(all_candidates[best_start + j]);
+    for (std::size_t idx : best.selected_indices) {
+        candidates.push_back(TeamCandidate{idx, queue[idx].player.mmr()});
     }
 
     std::sort(candidates.begin(), candidates.end(),
-              [](const Candidate& a, const Candidate& b) {
+              [](const TeamCandidate& a, const TeamCandidate& b) {
                   return a.mmr > b.mmr;
               });
 
@@ -226,7 +300,7 @@ bool MatchBuilder::BuildMatch(std::deque<PlayerEntry>& queue,
         }
     }
 
-    std::vector<bool> selected(queue.size(), false);
+    std::vector<bool> selected_flags(n, false);
 
     long long total_wait_ms = 0;
     long long sum_mmr_match = 0;
@@ -234,8 +308,8 @@ bool MatchBuilder::BuildMatch(std::deque<PlayerEntry>& queue,
     int max_mmr_match = std::numeric_limits<int>::min();
     int selected_count = 0;
 
-    for (std::size_t idx : team_a) {
-        selected[idx] = true;
+    auto add_player_to_match = [&](std::size_t idx) {
+        selected_flags[idx] = true;
         *outMatch.add_players() = queue[idx].player;
 
         int mmr = queue[idx].player.mmr();
@@ -246,31 +320,19 @@ bool MatchBuilder::BuildMatch(std::deque<PlayerEntry>& queue,
         if (mmr > max_mmr_match) {
             max_mmr_match = mmr;
         }
-        auto wait_i = std::chrono::duration_cast<std::chrono::milliseconds>(now - queue[idx].queuedAt).count();
-        if (wait_i < 0) {
-            wait_i = 0;
+        long long w = wait_ms[idx];
+        if (w < 0) {
+            w = 0;
         }
-        total_wait_ms += wait_i;
+        total_wait_ms += w;
         ++selected_count;
+    };
+
+    for (std::size_t idx : team_a) {
+        add_player_to_match(idx);
     }
     for (std::size_t idx : team_b) {
-        selected[idx] = true;
-        *outMatch.add_players() = queue[idx].player;
-
-        int mmr = queue[idx].player.mmr();
-        sum_mmr_match += mmr;
-        if (mmr < min_mmr_match) {
-            min_mmr_match = mmr;
-        }
-        if (mmr > max_mmr_match) {
-            max_mmr_match = mmr;
-        }
-        auto wait_i = std::chrono::duration_cast<std::chrono::milliseconds>(now - queue[idx].queuedAt).count();
-        if (wait_i < 0) {
-            wait_i = 0;
-        }
-        total_wait_ms += wait_i;
-        ++selected_count;
+        add_player_to_match(idx);
     }
 
     if (metrics) {
@@ -289,8 +351,8 @@ bool MatchBuilder::BuildMatch(std::deque<PlayerEntry>& queue,
 
     std::deque<PlayerEntry> remaining;
 
-    for (std::size_t i = 0; i < queue.size(); ++i) {
-        if (!selected[i]) {
+    for (std::size_t i = 0; i < n; ++i) {
+        if (!selected_flags[i]) {
             remaining.push_back(queue[i]);
         }
     }

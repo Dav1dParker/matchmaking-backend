@@ -23,6 +23,8 @@ struct EngineConfig {
     int cross_region_step_ms = 60000;
     int good_region_ping_ms = 100;
 
+    int emergency_match_wait_ms = 300000;
+
     static EngineConfig LoadFromFile(const std::string& path);
     bool SaveToFile(const std::string& path) const;
 };
