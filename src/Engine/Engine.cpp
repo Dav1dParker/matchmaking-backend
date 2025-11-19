@@ -73,6 +73,11 @@ void Engine::TickLoop() {
                               << " mmr_spread=" << mmr_spread
                               << " avg_wait_s=" << avg_wait_seconds
                               << std::endl;
+                    metrics_.matches_per_region[region] += 1;
+                    metrics_.last_match_average_mmr = metrics.average_mmr;
+                    metrics_.last_match_mmr_spread = mmr_spread;
+                    metrics_.last_match_average_wait_seconds = avg_wait_seconds;
+                    metrics_.queue_sizes_per_region[region] = queue_.size();
                     for (int i = 0; i < match.players_size(); ++i) {
                         const auto& p = match.players(i);
                         pendingMatches_[p.id()].push_back(match);
