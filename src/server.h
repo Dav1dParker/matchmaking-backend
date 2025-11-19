@@ -20,6 +20,14 @@ public:
                                const matchmaking::PlayerID* request,
                                grpc::ServerWriter<matchmaking::Match>* writer) override;
 
+    grpc::Status GetMetrics(grpc::ServerContext*,
+                            const matchmaking::MetricsRequest* request,
+                            matchmaking::MetricsResponse* response) override;
+
+    grpc::Status GetQueue(grpc::ServerContext*,
+                          const matchmaking::MetricsRequest* request,
+                          matchmaking::QueueSnapshot* response) override;
+
 private:
     Engine engine_;
 };

@@ -1,5 +1,7 @@
 # Matchmaking Simulation Backend
 
+[![CI](https://github.com/dav1dparker/matchmaking-backend/actions/workflows/ci.yml/badge.svg)](https://github.com/dav1dparker/matchmaking-backend/actions/workflows/ci.yml)
+
 This repository contains a small C++20 matchmaking system intended as a showcase project. The project simulates players joining a queue and being matched into balanced 5v5 games, using a gRPC backend and a separate simulation client.
 
 ## Overview

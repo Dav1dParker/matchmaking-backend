@@ -50,18 +50,10 @@ int RunSimulator(const SimConfig& config) {
     std::cout << "Starting match_simulator, target=" << config.target_address
               << ", total_players=" << config.total_players << std::endl;
 
-    SimulatorClient client(config.target_address);
-    std::vector<std::thread> stream_threads;
-    stream_threads.reserve(config.total_players);
-
     for (int i = 0; i < config.total_players; ++i) {
         auto player = MakeDummyPlayer(i);
 
-        std::string player_id = player.id();
-        stream_threads.emplace_back([player_id, &client]() {
-            client.StreamMatches(player_id);
-        });
-
+        SimulatorClient client(config.target_address);
         bool ok = client.Enqueue(player);
         if (!ok) {
             std::cerr << "Failed to enqueue player " << player.id() << "\n";
@@ -77,13 +69,7 @@ int RunSimulator(const SimConfig& config) {
         std::this_thread::sleep_for(std::chrono::milliseconds(config.delay_ms_between_players));
     }
 
-    std::cout << "Simulation finished, waiting for match streams.\n";
-
-    for (auto& t : stream_threads) {
-        if (t.joinable()) {
-            t.join();
-        }
-    }
+    std::cout << "Simulation finished.\n";
 
     return 0;
 }
@@ -143,8 +129,10 @@ int main() {
         std::cout << "\nMatch simulator menu:\n";
         std::cout << "1) Run simulator\n";
         std::cout << "2) Change options\n";
-        std::cout << "3) Reset options to defaults\n";
-        std::cout << "4) Exit\n";
+        std::cout << "3) View metrics\n";
+        std::cout << "4) View queue\n";
+        std::cout << "5) Reset options to defaults\n";
+        std::cout << "6) Exit\n";
         std::cout << "Select option: ";
 
         int choice = 0;
@@ -160,15 +148,21 @@ int main() {
 
         if (choice == 1) {
             config.SaveToFile("config/sim_config.json");
-            return RunSimulator(config);
+            RunSimulator(config);
         } else if (choice == 2) {
             EditSimConfig(config);
             config.SaveToFile("config/sim_config.json");
         } else if (choice == 3) {
+            SimulatorClient client(config.target_address);
+            client.PrintMetrics();
+        } else if (choice == 4) {
+            SimulatorClient client(config.target_address);
+            client.PrintQueue();
+        } else if (choice == 5) {
             config = SimConfig();
             config.SaveToFile("config/sim_config.json");
             std::cout << "Options reset to defaults.\n";
-        } else if (choice == 4) {
+        } else if (choice == 6) {
             break;
         }
     }

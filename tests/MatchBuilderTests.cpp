@@ -392,3 +392,93 @@ TEST(MatchBuilderTests, AcceptsUnbalancedMatchAfterMinWait) {
     EXPECT_EQ(match.players_size(), 10);
     EXPECT_TRUE(queue.empty());
 }
+
+TEST(MatchBuilderTests, GoodRegionPingAllowsCrossRegionWithoutWait) {
+    std::deque<PlayerEntry> queue;
+
+    EngineConfig config = DefaultTestConfig();
+    config.good_region_ping_ms = 60;
+    config.cross_region_step_ms = 60000;
+
+    for (int i = 0; i < 10; ++i) {
+        Player p;
+        p.set_id("p" + std::to_string(i));
+        p.set_mmr(1500);
+        p.set_ping_na(20);
+        p.set_ping_eu(40);
+        p.set_ping_asia(200);
+        p.set_region("NA");
+        queue.emplace_back(p);
+    }
+
+    Match match;
+    bool built = MatchBuilder::BuildMatch(queue, match, config, "EU");
+
+    EXPECT_TRUE(built);
+    EXPECT_EQ(match.players_size(), 10);
+    EXPECT_TRUE(queue.empty());
+}
+
+TEST(MatchBuilderTests, CrossRegionRequiresWaitBeforeAllow) {
+    std::deque<PlayerEntry> queue;
+
+    EngineConfig config = DefaultTestConfig();
+    config.good_region_ping_ms = 50;
+    config.cross_region_step_ms = 20000;
+
+    for (int i = 0; i < 10; ++i) {
+        Player p;
+        p.set_id("p" + std::to_string(i));
+        p.set_mmr(1500);
+        p.set_ping_na(20);
+        p.set_ping_eu(80);
+        p.set_ping_asia(200);
+        p.set_region("NA");
+        queue.emplace_back(p);
+    }
+
+    Match match;
+    bool built_without_wait = MatchBuilder::BuildMatch(queue, match, config, "EU");
+
+    EXPECT_FALSE(built_without_wait);
+    EXPECT_EQ(queue.size(), 10u);
+
+    for (auto& entry : queue) {
+        entry.queuedAt -= std::chrono::seconds(21);
+    }
+
+    Match match_after_wait;
+    bool built_after_wait = MatchBuilder::BuildMatch(queue, match_after_wait, config, "EU");
+
+    EXPECT_TRUE(built_after_wait);
+    EXPECT_EQ(match_after_wait.players_size(), 10);
+    EXPECT_TRUE(queue.empty());
+}
+
+TEST(MatchBuilderTests, MetricsAreComputedForBuiltMatch) {
+    std::deque<PlayerEntry> queue;
+
+    EngineConfig config = DefaultTestConfig();
+
+    for (int i = 0; i < 10; ++i) {
+        Player p;
+        p.set_id("p" + std::to_string(i));
+        p.set_mmr(1000 + i * 10);
+        p.set_ping(40);
+        p.set_region("NA");
+        queue.emplace_back(p);
+    }
+
+    Match match;
+    MatchMetrics metrics;
+    bool built = MatchBuilder::BuildMatch(queue, match, config, "NA", &metrics);
+
+    EXPECT_TRUE(built);
+    EXPECT_EQ(match.players_size(), 10);
+    EXPECT_TRUE(queue.empty());
+
+    EXPECT_DOUBLE_EQ(metrics.average_mmr, 1045.0);
+    EXPECT_EQ(metrics.min_mmr, 1000);
+    EXPECT_EQ(metrics.max_mmr, 1090);
+    EXPECT_GE(metrics.average_wait_ms, 0.0);
+}

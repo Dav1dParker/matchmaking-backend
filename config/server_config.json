@@ -12,5 +12,6 @@
   "mmr_diff_relax_per_second": 5,
   "max_relaxed_mmr_diff": 300,
   "cross_region_step_ms": 60000,
-  "good_region_ping_ms": 100
+  "good_region_ping_ms": 100,
+  "emergency_match_wait_ms": 300000
 }
