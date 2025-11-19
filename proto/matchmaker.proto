@@ -6,6 +6,8 @@ service Matchmaker {
   rpc Enqueue(Player) returns (EnqueueResponse);
   rpc Cancel(PlayerID) returns (CancelResponse);
   rpc StreamMatches(PlayerID) returns (stream Match);
+  rpc GetMetrics(MetricsRequest) returns (MetricsResponse);
+  rpc GetQueue(MetricsRequest) returns (QueueSnapshot);
 }
 
 message Player {
@@ -34,3 +36,34 @@ message EnqueueResponse {
 message CancelResponse {
   bool success = 1;
 }
+
+message MetricsRequest {
+}
+
+message RegionMetrics {
+  string region = 1;
+  uint64 queue_size = 2;
+  uint64 matches = 3;
+}
+
+message MetricsResponse {
+  repeated RegionMetrics regions = 1;
+  double last_match_average_mmr = 2;
+  double last_match_mmr_spread = 3;
+  double last_match_average_wait_seconds = 4;
+}
+
+message QueuePlayer {
+  string id = 1;
+  string region = 2;
+  int32 mmr = 3;
+  int32 ping_na = 4;
+  int32 ping_eu = 5;
+  int32 ping_asia = 6;
+  double waited_seconds = 7;
+}
+
+message QueueSnapshot {
+  repeated QueuePlayer players = 1;
+}
+

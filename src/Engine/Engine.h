@@ -28,6 +28,8 @@ public:
     void AddPlayer(const matchmaking::Player& player);
     bool RemovePlayer(const std::string& id);
     std::vector<matchmaking::Match> GetMatchesForPlayer(const std::string& id);
+    EngineMetrics GetMetricsSnapshot() const;
+    void FillQueueSnapshot(matchmaking::QueueSnapshot& snapshot) const;
 
 private:
     void TickLoop();
@@ -38,7 +40,7 @@ private:
     MatchPersistence persistence_;
     EngineMetrics metrics_;
 
-    std::mutex mtx_;
+    mutable std::mutex mtx_;
     std::atomic<bool> running_{false};
     std::thread worker_;
 };
